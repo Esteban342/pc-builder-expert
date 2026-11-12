@@ -1,0 +1,15 @@
+# Archivos compilados de Java
+*.class
+java/bin/
+sources.txt
+
+# Configuración del IDE (VS Code)
+.vscode/
+java/.vscode/
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+
+# Archivos temporales
+*.log
