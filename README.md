@@ -58,6 +58,7 @@ Para ejecutar y probar este proyecto de manera local, es necesario tener instala
 5. Interactuar con las ventanas emergentes respondiendo el cuestionario para recibir la recomendación del sistema.
 
 Autor
-Esteban342 (Mejorado Martinez Juan Esteban)
+
+(Mejorado Martinez Juan Esteban)
 
 Ingeniería en Sistemas Computacionales
