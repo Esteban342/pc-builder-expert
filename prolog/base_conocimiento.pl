@@ -102,6 +102,12 @@ pref_maestro_ram('16gb').
 % ------------------------------------------------------------
 compatible_socket(CPU_ID, MB_ID) :- cpu(CPU_ID, _, _, Socket, _, _, _, _), motherboard(MB_ID, _, _, Socket, _, _, _).
 compatible_ram(MB_ID, RAM_ID) :- motherboard(MB_ID, _, _, _, _, TipoDDR_MB, _), ram(RAM_ID, TipoDDR_RAM, _, _, _), TipoDDR_MB == TipoDDR_RAM.
+
+% Regla para no mezclar CPUs de gama alta con placas muy básicas
+compatible_tier(CPU_ID, MB_ID) :- 
+    cpu(CPU_ID, _, _, _, _, _, Gama, _),
+    motherboard(MB_ID, _, _, _, _, _, _),
+    ( Gama == alta -> MB_ID \= mb_h610m, MB_ID \= mb_a520m ; true ).
 consumo_estimado(CPU_ID, GPU_ID, Watts) :- cpu(CPU_ID, _, _, _, TDP_CPU, _, _, _), ( gpu(GPU_ID, _, _, TDP_GPU, _, _, _) -> true ; TDP_GPU = 0 ), Base is TDP_CPU + TDP_GPU, Watts is Base * 1.30.
 fuente_recomendada(CPU_ID, GPU_ID, Rango) :- consumo_estimado(CPU_ID, GPU_ID, Watts), Min is ceiling(Watts / 50) * 50, Max is Min + 100, atom_concat(Min, 'W - ', T1), atom_concat(T1, Max, T2), atom_concat(T2, 'W', Rango).
 
@@ -133,7 +139,7 @@ puntaje_cpu(edicion, baja, 0). puntaje_cpu(edicion, media, 2). puntaje_cpu(edici
 puntaje_cpu(maestro, baja, 3). puntaje_cpu(maestro, media, 1). puntaje_cpu(maestro, alta, 0).
 
 puntaje_gpu(gaming, baja, 0). puntaje_gpu(gaming, media, 2). puntaje_gpu(gaming, alta, 3).
-puntaje_gpu(programacion, baja, 3). puntaje_gpu(programacion, media, 1). puntaje_gpu(programacion, alta, 0).
+puntaje_gpu(programacion, baja, 1). puntaje_gpu(programacion, media, 1). puntaje_gpu(programacion, alta, 0). puntaje_gpu(programacion, 'integrada', 4).
 puntaje_gpu(edicion, baja, 0). puntaje_gpu(edicion, media, 2). puntaje_gpu(edicion, alta, 3).
 puntaje_gpu(maestro, baja, 3). puntaje_gpu(maestro, media, 1). puntaje_gpu(maestro, alta, 0).
 puntaje_gpu(_, 'integrada', 1).
@@ -184,6 +190,7 @@ build_valido(Uso, CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto) :-
     gpu_apto_para(Uso, GPU_ID),
     motherboard(MB_ID, _, _, _, _, _, _),
     compatible_socket(CPU_ID, MB_ID),
+     compatible_tier(CPU_ID, MB_ID),
     compatible_ram(MB_ID, RAM_ID),
     almacenamiento(ALM_ID, _, _, _),
     
