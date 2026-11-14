@@ -1,5 +1,5 @@
 % ============================================================
-% PC Builder Expert - Base de Conocimiento v3.5 (Lógica Estricta)
+% PC Builder Expert - Base de Conocimiento v3.8 (Opciones Ampliadas)
 % ============================================================
 
 % ------------------------------------------------------------
@@ -7,7 +7,7 @@
 % ------------------------------------------------------------
 uso(gaming). uso(programacion). uso(edicion). uso(maestro).
 
-presupuesto_minimo(gaming, 450).
+presupuesto_minimo(gaming, 550).
 presupuesto_minimo(programacion, 400).
 presupuesto_minimo(edicion, 550).
 presupuesto_minimo(maestro, 300).
@@ -69,33 +69,17 @@ almacenamiento(alm_ssd_nvme_2tb, ssd_nvme, 2000, 120).
 almacenamiento(alm_ssd_nvme_4tb, ssd_nvme, 4000, 220).
 
 % ------------------------------------------------------------
-% 2. HECHOS DINÁMICOS (PREFERENCIAS)
+% 2. HECHOS DINÁMICOS Y VALORES POR DEFECTO
 % ------------------------------------------------------------
-:- dynamic(pref_gaming_resolucion/1).
-:- dynamic(pref_gaming_juegos/1).
-:- dynamic(pref_gaming_prioridad/1).
-:- dynamic(pref_edicion_software/1).
-:- dynamic(pref_edicion_resolucion/1).
-:- dynamic(pref_edicion_prioridad/1).
-:- dynamic(pref_prog_area/1).
-:- dynamic(pref_prog_entorno/1).
-:- dynamic(pref_prog_monitores/1).
-:- dynamic(pref_maestro_tareas/1).
-:- dynamic(pref_maestro_formato/1).
-:- dynamic(pref_maestro_ram/1).
+:- dynamic(pref_gaming_resolucion/1). :- dynamic(pref_gaming_juegos/1). :- dynamic(pref_gaming_prioridad/1).
+:- dynamic(pref_edicion_software/1). :- dynamic(pref_edicion_resolucion/1). :- dynamic(pref_edicion_prioridad/1).
+:- dynamic(pref_prog_area/1). :- dynamic(pref_prog_entorno/1). :- dynamic(pref_prog_monitores/1).
+:- dynamic(pref_maestro_tareas/1). :- dynamic(pref_maestro_formato/1). :- dynamic(pref_maestro_ram/1).
 
-pref_gaming_resolucion('1080p_60hz').
-pref_gaming_juegos(esports).
-pref_gaming_prioridad(gpu).
-pref_edicion_software(premiere).
-pref_edicion_resolucion('1080p').
-pref_edicion_prioridad(render_gpu).
-pref_prog_area(web_movil).
-pref_prog_entorno(ligero).
-pref_prog_monitores(uno).
-pref_maestro_tareas(ofimatica).
-pref_maestro_formato(torre).
-pref_maestro_ram('16gb').
+pref_gaming_resolucion('1080p_60hz'). pref_gaming_juegos(esports). pref_gaming_prioridad(gpu).
+pref_edicion_software(premiere). pref_edicion_resolucion('1080p'). pref_edicion_prioridad(render_gpu).
+pref_prog_area(web_movil). pref_prog_entorno(ligero). pref_prog_monitores(uno).
+pref_maestro_tareas(ofimatica). pref_maestro_formato(torre). pref_maestro_ram('16gb').
 
 % ------------------------------------------------------------
 % 3. REGLAS DE COMPATIBILIDAD Y CÁLCULO
@@ -103,20 +87,20 @@ pref_maestro_ram('16gb').
 compatible_socket(CPU_ID, MB_ID) :- cpu(CPU_ID, _, _, Socket, _, _, _, _), motherboard(MB_ID, _, _, Socket, _, _, _).
 compatible_ram(MB_ID, RAM_ID) :- motherboard(MB_ID, _, _, _, _, TipoDDR_MB, _), ram(RAM_ID, TipoDDR_RAM, _, _, _), TipoDDR_MB == TipoDDR_RAM.
 
-% Regla para no mezclar CPUs de gama alta con placas muy básicas
 compatible_tier(CPU_ID, MB_ID) :- 
-    cpu(CPU_ID, _, _, _, _, _, Gama, _),
-    motherboard(MB_ID, _, _, _, _, _, _),
-    ( Gama == alta -> MB_ID \= mb_h610m, MB_ID \= mb_a520m ; true ).
+    cpu(CPU_ID, _, _, _, _, _, GamaCPU, _),
+    motherboard(MB_ID, _, _, _, PrecioMB, _, _),
+    ( GamaCPU == baja -> PrecioMB =< 130 ; true ),
+    ( GamaCPU == alta -> (MB_ID \= mb_h610m, MB_ID \= mb_a520m) ; true ).
+
 consumo_estimado(CPU_ID, GPU_ID, Watts) :- cpu(CPU_ID, _, _, _, TDP_CPU, _, _, _), ( gpu(GPU_ID, _, _, TDP_GPU, _, _, _) -> true ; TDP_GPU = 0 ), Base is TDP_CPU + TDP_GPU, Watts is Base * 1.30.
 fuente_recomendada(CPU_ID, GPU_ID, Rango) :- consumo_estimado(CPU_ID, GPU_ID, Watts), Min is ceiling(Watts / 50) * 50, Max is Min + 100, atom_concat(Min, 'W - ', T1), atom_concat(T1, Max, T2), atom_concat(T2, 'W', Rango).
 
-% Cuellos de botella
 cuello_botella(CPU_ID, GPU_ID) :- cpu(CPU_ID, _, _, _, _, _, baja, _), gpu(GPU_ID, _, _, _, _, alta, _).
 cuello_botella_inverso(CPU_ID, GPU_ID) :- cpu(CPU_ID, _, _, _, _, _, alta, _), gpu(GPU_ID, _, _, _, _, baja, _).
 
 % ------------------------------------------------------------
-% 4. REGLAS DE APTITUD POR USO
+% 4. REGLAS DE APTITUD POR USO (Con nuevas restricciones)
 % ------------------------------------------------------------
 cpu_apto_para(gaming, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama \= baja.
 cpu_apto_para(edicion, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama \= baja.
@@ -124,19 +108,29 @@ cpu_apto_para(programacion, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama
 cpu_apto_para(maestro, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, _, si).
 cpu_apto_para(maestro, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, baja, _).
 
-gpu_apto_para(gaming, GPU_ID) :- gpu(GPU_ID, _, _, _, _, Gama, _), Gama \= baja.
-gpu_apto_para(edicion, GPU_ID) :- gpu(GPU_ID, _, _, _, _, Gama, VRAM), Gama \= baja, VRAM >= 8.
+% Restricción: Para VR se necesita al menos 12GB de VRAM
+gpu_apto_para(gaming, GPU_ID) :- 
+    gpu(GPU_ID, _, _, _, _, Gama, VRAM), 
+    Gama \= baja,
+    ( pref_gaming_juegos(vr) -> VRAM >= 12 ; true ).
+
+gpu_apto_para(edicion, GPU_ID) :- 
+    gpu(GPU_ID, _, _, _, _, Gama, VRAM), 
+    Gama \= baja, 
+    VRAM >= 8,
+    ( (pref_edicion_software(blender) ; pref_edicion_software(arquitectura_3d)) -> gpu(GPU_ID, nvidia, _, _, _, _, _) ; true ).
+
 gpu_apto_para(programacion, GPU_ID) :- gpu(GPU_ID, _, _, _, _, _, _).
 gpu_apto_para(programacion, 'integrada').
 gpu_apto_para(maestro, 'integrada').
 
 % ------------------------------------------------------------
-% 5. PUNTAJES Y BONIFICACIONES (SISTEMA UNIVERSAL)
+% 5. PUNTAJES Y BONIFICACIONES
 % ------------------------------------------------------------
 puntaje_cpu(gaming, baja, 0). puntaje_cpu(gaming, media, 2). puntaje_cpu(gaming, alta, 3).
 puntaje_cpu(programacion, baja, 1). puntaje_cpu(programacion, media, 2). puntaje_cpu(programacion, alta, 3).
 puntaje_cpu(edicion, baja, 0). puntaje_cpu(edicion, media, 2). puntaje_cpu(edicion, alta, 3).
-puntaje_cpu(maestro, baja, 3). puntaje_cpu(maestro, media, 1). puntaje_cpu(maestro, alta, 0).
+puntaje_cpu(maestro, baja, 1). puntaje_cpu(maestro, media, 3). puntaje_cpu(maestro, alta, 0).
 
 puntaje_gpu(gaming, baja, 0). puntaje_gpu(gaming, media, 2). puntaje_gpu(gaming, alta, 3).
 puntaje_gpu(programacion, baja, 1). puntaje_gpu(programacion, media, 1). puntaje_gpu(programacion, alta, 0). puntaje_gpu(programacion, 'integrada', 4).
@@ -144,15 +138,25 @@ puntaje_gpu(edicion, baja, 0). puntaje_gpu(edicion, media, 2). puntaje_gpu(edici
 puntaje_gpu(maestro, baja, 3). puntaje_gpu(maestro, media, 1). puntaje_gpu(maestro, alta, 0).
 puntaje_gpu(_, 'integrada', 1).
 
+% Bonificaciones Gaming
 bonus_gaming_prioridad_gpu(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, alta, _).
 bonus_gaming_prioridad_cpu(CPU_ID, 5) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
 bonus_gaming_resolucion(GPU_ID, 3) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
+bonus_gaming_vr(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
+
+% Bonificaciones Edición
 bonus_edicion_resolucion(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
 bonus_edicion_prioridad_gpu(GPU_ID, 4) :- gpu(GPU_ID, _, _, _, _, alta, _).
-bonus_prog_entorno_pesado(CPU_ID, 3) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
 
-% --- NUEVO: Puntaje Universal de RAM ---
-% Castigamos fuertemente tener menos de 16GB en gaming/edición.
+% Bonificaciones Programación
+bonus_prog_entorno_pesado(CPU_ID, 3) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
+bonus_prog_ciberseguridad(CPU_ID, 4) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
+
+% Bonificaciones Maestro
+bonus_maestro_docencia(RAM_ID, 3) :- ram(RAM_ID, _, Cap, _, _), Cap >= 16.
+bonus_maestro_cpu(CPU_ID, 3) :- pref_maestro_tareas(docencia_virtual), cpu(CPU_ID, _, _, _, _, _, media, _).
+
+% RAM (Puntaje Universal)
 puntaje_ram(gaming, 8, -10). puntaje_ram(gaming, 16, 3). puntaje_ram(gaming, 32, 5). puntaje_ram(gaming, 64, 5).
 puntaje_ram(edicion, 8, -10). puntaje_ram(edicion, 16, 2). puntaje_ram(edicion, 32, 5). puntaje_ram(edicion, 64, 8).
 puntaje_ram(programacion, 8, -5). puntaje_ram(programacion, 16, 3). puntaje_ram(programacion, 32, 5). puntaje_ram(programacion, 64, 5).
@@ -161,7 +165,7 @@ puntaje_ram(maestro, 16, 5) :- pref_maestro_ram('16gb'), !.
 puntaje_ram(maestro, 32, 5) :- pref_maestro_ram('32gb'), !.
 puntaje_ram(_, _, 0).
 
-% --- NUEVO: Puntaje Universal de Almacenamiento (Tipo y Capacidad) ---
+% Almacenamiento
 puntaje_almacenamiento(Tipo, Cap, Puntaje) :-
     ( Tipo == ssd_nvme -> Base = 5 ; Tipo == ssd_sata -> Base = 3 ; Tipo == hdd -> Base = -5 ),
     ( Cap >= 2000 -> Bonus = 3 ; Cap >= 1000 -> Bonus = 2 ; Cap >= 500 -> Bonus = 1 ; Bonus = 0 ),
@@ -190,20 +194,15 @@ build_valido(Uso, CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto) :-
     gpu_apto_para(Uso, GPU_ID),
     motherboard(MB_ID, _, _, _, _, _, _),
     compatible_socket(CPU_ID, MB_ID),
-     compatible_tier(CPU_ID, MB_ID),
+    compatible_tier(CPU_ID, MB_ID),
     compatible_ram(MB_ID, RAM_ID),
     almacenamiento(ALM_ID, _, _, _),
-    
-    % REGLA ESTRICTA: Filtrar si la RAM es muy baja para el uso
     ram(RAM_ID, _, CapRam, _, _),
     ( (Uso == gaming ; Uso == edicion) -> CapRam >= 16 ; true ),
-    
-    % REGLA ESTRICTA: Filtrar cuellos de botella
     ( GPU_ID == 'integrada' -> true ; 
       \+ cuello_botella(CPU_ID, GPU_ID),
       ( Uso == gaming -> \+ cuello_botella_inverso(CPU_ID, GPU_ID) ; true )
     ),
-    
     dentro_presupuesto(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto).
 
 calcular_puntaje_total(Uso, CPU_ID, GPU_ID, _MB_ID, RAM_ID, ALM_ID, Puntaje) :-
@@ -212,16 +211,14 @@ calcular_puntaje_total(Uso, CPU_ID, GPU_ID, _MB_ID, RAM_ID, ALM_ID, Puntaje) :-
     ram(RAM_ID, _, Capacidad, _, _),
     almacenamiento(ALM_ID, TipoAlm, CapAlm, _),
     
-    puntaje_cpu(Uso, GC, PC), 
-    puntaje_gpu(Uso, GG, PG),
-    puntaje_ram(Uso, Capacidad, PRAM),
-    puntaje_almacenamiento(TipoAlm, CapAlm, PAlm),
-    
+    puntaje_cpu(Uso, GC, PC), puntaje_gpu(Uso, GG, PG),
+    puntaje_ram(Uso, Capacidad, PRAM), puntaje_almacenamiento(TipoAlm, CapAlm, PAlm),
     PuntajeBase is PC + PG + PRAM + PAlm,
     
     ( Uso == gaming -> sumar_bonus_gaming(GPU_ID, CPU_ID, Bonus) ;
       Uso == edicion -> sumar_bonus_edicion(GPU_ID, Bonus) ;
       Uso == programacion -> sumar_bonus_prog(CPU_ID, Bonus) ;
+      Uso == maestro -> sumar_bonus_maestro(RAM_ID, CPU_ID, Bonus) ;
       Bonus = 0 ),
     Puntaje is PuntajeBase + Bonus.
 
@@ -229,7 +226,8 @@ sumar_bonus_gaming(GPU_ID, CPU_ID, Bonus) :-
     ( bonus_gaming_prioridad_gpu(GPU_ID, B1) -> true ; B1 = 0 ),
     ( bonus_gaming_prioridad_cpu(CPU_ID, B2) -> true ; B2 = 0 ),
     ( bonus_gaming_resolucion(GPU_ID, B3) -> true ; B3 = 0 ),
-    Bonus is B1 + B2 + B3.
+    ( pref_gaming_juegos(vr) -> bonus_gaming_vr(GPU_ID, B4) ; B4 = 0 ),
+    Bonus is B1 + B2 + B3 + B4.
 
 sumar_bonus_edicion(GPU_ID, Bonus) :-
     ( bonus_edicion_resolucion(GPU_ID, B1) -> true ; B1 = 0 ),
@@ -238,7 +236,13 @@ sumar_bonus_edicion(GPU_ID, Bonus) :-
 
 sumar_bonus_prog(CPU_ID, Bonus) :-
     ( bonus_prog_entorno_pesado(CPU_ID, B1) -> true ; B1 = 0 ),
-    Bonus is B1.
+    ( pref_prog_area(ciberseguridad) -> bonus_prog_ciberseguridad(CPU_ID, B2) ; B2 = 0 ),
+    Bonus is B1 + B2.
+
+sumar_bonus_maestro(RAM_ID, CPU_ID, Bonus) :-
+    ( pref_maestro_tareas(docencia_virtual) -> bonus_maestro_docencia(RAM_ID, B1) ; B1 = 0 ),
+    ( pref_maestro_tareas(docencia_virtual) -> bonus_maestro_cpu(CPU_ID, B2) ; B2 = 0 ),
+    Bonus is B1 + B2.
 
 mejor_build(Uso, Presupuesto, CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID) :-
     findall(PuntajeTotal-build(C, G, M, R, A),

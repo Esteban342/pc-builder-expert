@@ -18,7 +18,6 @@ public class Main {
             "Bienvenido a PC Builder Expert.\n\nTe ayudaremos a elegir los mejores componentes para tu computadora.", 
             "Sistema Experto", JOptionPane.INFORMATION_MESSAGE);
 
-        // 1. Preguntar Uso y Presupuesto
         String[] opcionesUso = {"gaming", "programacion", "edicion", "maestro"};
         String usoSeleccionado = (String) JOptionPane.showInputDialog(null, "¿Cuál es el uso principal que le darás a tu PC?", "Paso 1: Uso", JOptionPane.QUESTION_MESSAGE, null, opcionesUso, opcionesUso[0]);
         
@@ -40,11 +39,9 @@ public class Main {
             return;
         }
 
-        // 2. Limpiamos respuestas viejas y hacemos las preguntas dinámicas
         servicio.limpiarPreferencias();
         hacerPreguntasDinamicas(servicio, usoSeleccionado);
 
-        // 3. Obtener el Build
         Map<String, String> build = servicio.obtenerMejorBuild(usoSeleccionado, presupuesto);
 
         if (build == null) {
@@ -52,7 +49,6 @@ public class Main {
             return;
         }
 
-        // 4. Traducir nombres y mostrar resultados
         String idCpu = build.get("cpu");
         String idGpu = build.get("gpu");
         String idMb = build.get("motherboard");
@@ -87,14 +83,13 @@ public class Main {
         JOptionPane.showMessageDialog(null, mensajeResultado, "Resultado del Sistema Experto", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // --- AQUÍ ESTÁ LA MAGIA DE LAS PREGUNTAS DINÁMICAS ---
     private static void hacerPreguntasDinamicas(PrologService servicio, String uso) {
         if (uso.equals("gaming")) {
-            String[] res = {"1080p_60hz", "1080p_144hz", "1440p_144hz"};
+            String[] res = {"1080p_60hz", "1080p_144hz", "1440p_144hz", "4k_144hz"};
             String r1 = (String) JOptionPane.showInputDialog(null, "¿A qué resolución y tasa de refresco apuntas?", "Gaming", JOptionPane.QUESTION_MESSAGE, null, res, res[0]);
             if (r1 != null) servicio.insertarPreferencia("pref_gaming_resolucion", r1);
 
-            String[] juegos = {"esports", "aaa", "simulacion"};
+            String[] juegos = {"esports", "aaa", "simulacion", "vr"};
             String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué tipo de juegos disfrutas más?", "Gaming", JOptionPane.QUESTION_MESSAGE, null, juegos, juegos[0]);
             if (r2 != null) servicio.insertarPreferencia("pref_gaming_juegos", r2);
 
@@ -103,7 +98,7 @@ public class Main {
             if (r3 != null) servicio.insertarPreferencia("pref_gaming_prioridad", r3);
             
         } else if (uso.equals("edicion")) {
-            String[] software = {"premiere", "davinci", "blender"};
+            String[] software = {"premiere", "davinci", "blender", "arquitectura_3d", "fotografia"};
             String r1 = (String) JOptionPane.showInputDialog(null, "¿Qué software usas más?", "Edición", JOptionPane.QUESTION_MESSAGE, null, software, software[0]);
             if (r1 != null) servicio.insertarPreferencia("pref_edicion_software", r1);
 
@@ -116,12 +111,12 @@ public class Main {
             if (r3 != null) servicio.insertarPreferencia("pref_edicion_prioridad", r3);
 
         } else if (uso.equals("programacion")) {
-            String[] area = {"web_movil", "data_ia", "videojuegos"};
+            String[] area = {"web_movil", "data_ia", "videojuegos", "ciberseguridad", "backend_cloud"};
             String r1 = (String) JOptionPane.showInputDialog(null, "¿Qué tipo de desarrollo haces?", "Programación", JOptionPane.QUESTION_MESSAGE, null, area, area[0]);
             if (r1 != null) servicio.insertarPreferencia("pref_prog_area", r1);
 
-            String[] entorno = {"ligero", "pesado"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿Usas contenedores (Docker), Máquinas Virtuales o IDEs pesados?", "Programación", JOptionPane.QUESTION_MESSAGE, null, entorno, entorno[0]);
+            String[] entorno = {"ligero", "pesado", "compilacion_pesada"};
+            String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué tan pesado es tu entorno de desarrollo?", "Programación", JOptionPane.QUESTION_MESSAGE, null, entorno, entorno[0]);
             if (r2 != null) servicio.insertarPreferencia("pref_prog_entorno", r2);
 
             String[] monitores = {"uno", "dos", "tres_o_mas"};
@@ -129,15 +124,14 @@ public class Main {
             if (r3 != null) servicio.insertarPreferencia("pref_prog_monitores", r3);
 
         } else if (uso.equals("maestro")) {
-            String[] tareas = {"ofimatica", "diseno_ligero", "base_datos"};
+            String[] tareas = {"ofimatica", "diseno_ligero", "base_datos", "docencia_virtual", "gestion_administrativa"};
             String r1 = (String) JOptionPane.showInputDialog(null, "¿Cuáles son tus tareas principales?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, tareas, tareas[0]);
             if (r1 != null) servicio.insertarPreferencia("pref_maestro_tareas", r1);
 
-            String[] formato = {"mini_pc", "torre"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿Necesitas que sea un equipo compacto o una torre tradicional?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, formato, formato[0]);
+            String[] formato = {"mini_pc", "torre", "todo_en_uno"};
+            String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué formato prefieres?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, formato, formato[0]);
             if (r2 != null) servicio.insertarPreferencia("pref_maestro_formato", r2);
             
-            // Pregunta extra para maestro
             String[] ram = {"8gb", "16gb", "32gb"};
             String r3 = (String) JOptionPane.showInputDialog(null, "¿Cuánta memoria RAM necesitas para tu trabajo diario?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, ram, ram[0]);
             if (r3 != null) servicio.insertarPreferencia("pref_maestro_ram", r3);
