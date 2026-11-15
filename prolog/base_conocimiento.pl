@@ -1,262 +1,421 @@
+:- encoding(utf8).
 % ============================================================
-% PC Builder Expert - Base de Conocimiento v4.0 (Final Definitiva)
+% PC Builder Expert - Base de Conocimiento v6.2 (Lógica Corregida)
 % ============================================================
 
-% ------------------------------------------------------------
-% 0. USOS Y PRESUPUESTOS MÍNIMOS
-% ------------------------------------------------------------
-uso(gaming). uso(programacion). uso(edicion). uso(maestro).
-
-presupuesto_minimo(gaming, 550).
-presupuesto_minimo(programacion, 400).
-presupuesto_minimo(edicion, 550).
-presupuesto_minimo(maestro, 300).
+:- dynamic pref/2.
 
 % ------------------------------------------------------------
-% 1. HECHOS DE HARDWARE
+% 1. CPUs
 % ------------------------------------------------------------
-cpu(cpu_i3_12100, intel, 'Core i3-12100', lga1700, 60, 120, baja, si).
-cpu(cpu_i5_12400, intel, 'Core i5-12400', lga1700, 65, 180, media, si).
-cpu(cpu_i5_12400f, intel, 'Core i5-12400F', lga1700, 65, 160, media, no).
-cpu(cpu_i5_14600k, intel, 'Core i5-14600K', lga1700, 181, 240, alta, si).
-cpu(cpu_i7_12700k, intel, 'Core i7-12700K', lga1700, 125, 350, alta, si).
-cpu(cpu_i7_14700k, intel, 'Core i7-14700K', lga1700, 253, 400, alta, si).
-cpu(cpu_ryzen5_5600g, amd, 'Ryzen 5 5600G', am4, 65, 140, media, si).
-cpu(cpu_ryzen5_5600x, amd, 'Ryzen 5 5600X', am4, 65, 160, media, no).
-cpu(cpu_ryzen5_7400, amd, 'Ryzen 5 7400', am5, 65, 150, media, si).
-cpu(cpu_ryzen7_5700x, amd, 'Ryzen 7 5700X', am4, 65, 180, alta, no).
-cpu(cpu_ryzen7_5800x, amd, 'Ryzen 7 5800X', am4, 105, 250, alta, no).
-cpu(cpu_ryzen7_7700x, amd, 'Ryzen 7 7700X', am5, 105, 300, alta, si).
-cpu(cpu_ryzen7_7800x3d, amd, 'Ryzen 7 7800X3D', am5, 120, 380, alta, si).
-cpu(cpu_ryzen9_7900x, amd, 'Ryzen 9 7900X', am5, 170, 450, alta, si).
+cpu(cpu_i3_12100,       intel, 'Core i3-12100',        lga1700, 60,  4,  8, baja,  si, 110).
+cpu(cpu_i5_12400,       intel, 'Core i5-12400',        lga1700, 65,  6, 12, media, si, 150).
+cpu(cpu_i5_12400f,      intel, 'Core i5-12400F',       lga1700, 65,  6, 12, media, no, 130).
+cpu(cpu_i5_14400f,      intel, 'Core i5-14400F',       lga1700, 65, 10, 16, media, no, 170).
+cpu(cpu_i5_14600k,      intel, 'Core i5-14600K',       lga1700, 181, 14, 20, alta,  si, 240).
+cpu(cpu_i7_12700k,      intel, 'Core i7-12700K',       lga1700, 125, 12, 20, alta,  si, 300).
+cpu(cpu_i7_14700k,      intel, 'Core i7-14700K',       lga1700, 253, 20, 28, alta,  si, 360).
+cpu(cpu_i9_14900k,      intel, 'Core i9-14900K',       lga1700, 253, 24, 32, alta,  si, 450).
+cpu(cpu_ultra5_245k,    intel, 'Core Ultra 5 245K',    lga1851, 125, 14, 14, alta,  si, 260).
+cpu(cpu_ultra7_265k,    intel, 'Core Ultra 7 265K',    lga1851, 125, 20, 20, alta,  si, 380).
+cpu(cpu_ryzen5_5600,    amd,   'Ryzen 5 5600',         am4,  65,  6, 12, media, no, 110).
+cpu(cpu_ryzen5_5600g,   amd,   'Ryzen 5 5600G',        am4,  65,  6, 12, media, si, 130).
+cpu(cpu_ryzen5_5600x,   amd,   'Ryzen 5 5600X',        am4,  65,  6, 12, media, no, 130).
+cpu(cpu_ryzen7_5700x,   amd,   'Ryzen 7 5700X',        am4,  65,  8, 16, alta,  no, 170).
+cpu(cpu_ryzen7_5700x3d, amd,   'Ryzen 7 5700X3D',      am4, 105,  8, 16, alta,  no, 200).
+cpu(cpu_ryzen7_5800x3d, amd,   'Ryzen 7 5800X3D',      am4, 105,  8, 16, alta,  no, 280).
+cpu(cpu_ryzen5_7400,    amd,   'Ryzen 5 7400',         am5,  65,  6, 12, media, si, 150).
+cpu(cpu_ryzen5_7600,    amd,   'Ryzen 5 7600',         am5,  65,  6, 12, media, si, 170).
+cpu(cpu_ryzen5_9600x,   amd,   'Ryzen 5 9600X',        am5,  65,  6, 12, media, si, 220).
+cpu(cpu_ryzen7_7700,    amd,   'Ryzen 7 7700',         am5,  65,  8, 16, alta,  si, 260).
+cpu(cpu_ryzen7_7700x,   amd,   'Ryzen 7 7700X',        am5, 105,  8, 16, alta,  si, 300).
+cpu(cpu_ryzen7_9700x,   amd,   'Ryzen 7 9700X',        am5,  65,  8, 16, alta,  si, 300).
+cpu(cpu_ryzen7_7800x3d, amd,   'Ryzen 7 7800X3D',      am5, 120,  8, 16, alta,  si, 380).
+cpu(cpu_ryzen7_9800x3d, amd,   'Ryzen 7 9800X3D',      am5, 120,  8, 16, alta,  si, 460).
+cpu(cpu_ryzen9_7900x,   amd,   'Ryzen 9 7900X',        am5, 170, 12, 24, alta,  si, 380).
+cpu(cpu_ryzen9_9900x,   amd,   'Ryzen 9 9900X',        am5, 120, 12, 24, alta,  si, 420).
+cpu(cpu_ryzen9_9950x,   amd,   'Ryzen 9 9950X',        am5, 170, 16, 32, alta,  si, 600).
 
-gpu(gpu_gtx1650, nvidia, 'GeForce GTX 1650', 75, 120, baja, 4).
-gpu(gpu_rx6400, amd, 'Radeon RX 6400', 53, 115, baja, 4).
-gpu(gpu_rx6600, amd, 'Radeon RX 6600', 132, 220, media, 8).
-gpu(gpu_rtx3060, nvidia, 'GeForce RTX 3060', 170, 300, media, 12).
-gpu(gpu_rtx4060, nvidia, 'GeForce RTX 4060', 115, 320, media, 8).
-gpu(gpu_rx7600, amd, 'Radeon RX 7600', 165, 280, media, 8).
-gpu(gpu_rx6700xt, amd, 'Radeon RX 6700 XT', 230, 450, alta, 12).
-gpu(gpu_rtx3070, nvidia, 'GeForce RTX 3070', 220, 500, alta, 8).
-gpu(gpu_rtx4070, nvidia, 'GeForce RTX 4070', 200, 550, alta, 12).
-gpu(gpu_rtx4070ti, nvidia, 'GeForce RTX 4070 Ti', 285, 750, alta, 12).
-gpu(gpu_rx7900xt, amd, 'Radeon RX 7900 XT', 315, 800, alta, 20).
-
-motherboard(mb_a520m, asus, 'PRIME A520M-K', am4, 70, ddr4, no).
-motherboard(mb_b550m, msi, 'B550M PRO-VDH', am4, 100, ddr4, no).
-motherboard(mb_b550m_wifi, gigabyte, 'B550M DS3H AX', am4, 120, ddr4, si).
-motherboard(mb_b650m, gigabyte, 'B650M DS3H', am5, 150, ddr5, no).
-motherboard(mb_b650m_wifi, msi, 'PRO B650M-A WIFI', am5, 180, ddr5, si).
-motherboard(mb_h610m, asus, 'PRIME H610M-E', lga1700, 90, ddr4, no).
-motherboard(mb_b760m, msi, 'PRO B760M-A', lga1700, 130, ddr5, no).
-motherboard(mb_b760m_wifi, gigabyte, 'B760M DS3H AX', lga1700, 160, ddr5, si).
-motherboard(mb_z790, gigabyte, 'Z790 EAGLE AX', lga1700, 200, ddr5, si).
-
-ram(ram_ddr4_8gb_3200, ddr4, 8, 3200, 25).
-ram(ram_ddr4_16gb_3200, ddr4, 16, 3200, 45).
-ram(ram_ddr4_32gb_3600, ddr4, 32, 3600, 85).
-ram(ram_ddr5_16gb_5200, ddr5, 16, 5200, 60).
-ram(ram_ddr5_32gb_6000, ddr5, 32, 6000, 110).
-ram(ram_ddr5_64gb_6000, ddr5, 64, 6000, 210).
-
-almacenamiento(alm_hdd_1tb, hdd, 1000, 35).
-almacenamiento(alm_hdd_2tb, hdd, 2000, 55).
-almacenamiento(alm_ssd_sata_500gb, ssd_sata, 500, 30).
-almacenamiento(alm_ssd_sata_1tb, ssd_sata, 1000, 55).
-almacenamiento(alm_ssd_nvme_500gb, ssd_nvme, 500, 40).
-almacenamiento(alm_ssd_nvme_1tb, ssd_nvme, 1000, 65).
-almacenamiento(alm_ssd_nvme_2tb, ssd_nvme, 2000, 120).
-almacenamiento(alm_ssd_nvme_4tb, ssd_nvme, 4000, 220).
+rend_cpu(cpu_i3_12100,40,25).     rend_cpu(cpu_i5_12400,60,45).    rend_cpu(cpu_i5_12400f,60,45).
+rend_cpu(cpu_i5_14400f,64,60).    rend_cpu(cpu_i5_14600k,80,78).   rend_cpu(cpu_i7_12700k,78,72).
+rend_cpu(cpu_i7_14700k,88,92).    rend_cpu(cpu_i9_14900k,90,98).   rend_cpu(cpu_ultra5_245k,78,75).
+rend_cpu(cpu_ultra7_265k,85,85).  rend_cpu(cpu_ryzen5_5600,60,40).  rend_cpu(cpu_ryzen5_5600g,55,35).
+rend_cpu(cpu_ryzen5_5600x,62,42). rend_cpu(cpu_ryzen7_5700x,68,50). rend_cpu(cpu_ryzen7_5700x3d,88,50).
+rend_cpu(cpu_ryzen7_5800x3d,90,55). rend_cpu(cpu_ryzen5_7400,62,42). rend_cpu(cpu_ryzen5_7600,70,45).
+rend_cpu(cpu_ryzen5_9600x,76,55). rend_cpu(cpu_ryzen7_7700,74,58). rend_cpu(cpu_ryzen7_7700x,76,62).
+rend_cpu(cpu_ryzen7_9700x,80,62). rend_cpu(cpu_ryzen7_7800x3d,100,62). rend_cpu(cpu_ryzen7_9800x3d,100,62).
+rend_cpu(cpu_ryzen9_7900x,82,80). rend_cpu(cpu_ryzen9_9900x,84,88). rend_cpu(cpu_ryzen9_9950x,86,100).
 
 % ------------------------------------------------------------
-% 2. HECHOS DINÁMICOS Y VALORES POR DEFECTO
+% 2. GPUs
 % ------------------------------------------------------------
-:- dynamic(pref_gaming_resolucion/1). :- dynamic(pref_gaming_juegos/1). :- dynamic(pref_gaming_prioridad/1).
-:- dynamic(pref_edicion_software/1). :- dynamic(pref_edicion_resolucion/1). :- dynamic(pref_edicion_prioridad/1).
-:- dynamic(pref_prog_area/1). :- dynamic(pref_prog_entorno/1). :- dynamic(pref_prog_monitores/1).
-:- dynamic(pref_maestro_tareas/1). :- dynamic(pref_maestro_formato/1). :- dynamic(pref_maestro_ram/1).
+gpu(integrada,          none,   'Graficos integrados', 0,   baja,   0,   0, 0).
+gpu(gpu_gtx1650,        nvidia, 'GeForce GTX 1650',    75,  baja,   4, 230, 120).
+gpu(gpu_rx6400,         amd,    'Radeon RX 6400',      53,  baja,   4, 165, 115).
+gpu(gpu_arc_b580,       intel,  'Arc B580',           190,  media, 12, 270, 250).
+gpu(gpu_rx6600,         amd,    'Radeon RX 6600',     132,  media,  8, 225, 200).
+gpu(gpu_rtx4060,        nvidia, 'GeForce RTX 4060',   115,  media,  8, 240, 300).
+gpu(gpu_rx7600,         amd,    'Radeon RX 7600',     165,  media,  8, 240, 250).
+gpu(gpu_rtx5060,        nvidia, 'GeForce RTX 5060',   145,  media,  8, 240, 300).
+gpu(gpu_rx7600xt,       amd,    'Radeon RX 7600 XT',  190,  media, 16, 245, 330).
+gpu(gpu_rx9060xt,       amd,    'Radeon RX 9060 XT 16GB', 160, media, 16, 240, 350).
+gpu(gpu_rtx5060ti,      nvidia, 'GeForce RTX 5060 Ti 16GB', 180, media, 16, 240, 450).
+gpu(gpu_rx6700xt,       amd,    'Radeon RX 6700 XT',  230,  alta,  12, 267, 350).
+gpu(gpu_rx7700xt,       amd,    'Radeon RX 7700 XT',  245,  alta,  12, 267, 400).
+gpu(gpu_rx7800xt,       amd,    'Radeon RX 7800 XT',  263,  alta,  16, 267, 480).
+gpu(gpu_rtx4070s,       nvidia, 'GeForce RTX 4070 Super', 220, alta, 12, 267, 600).
+gpu(gpu_rx9070,         amd,    'Radeon RX 9070',     220,  alta,  16, 304, 600).
+gpu(gpu_rtx5070,        nvidia, 'GeForce RTX 5070',   250,  alta,  12, 267, 600).
+gpu(gpu_rx9070xt,       amd,    'Radeon RX 9070 XT',  304,  alta,  16, 304, 699).
+gpu(gpu_rtx5070ti,      nvidia, 'GeForce RTX 5070 Ti', 300, alta,  16, 304, 1099).
+gpu(gpu_rtx4080s,       nvidia, 'GeForce RTX 4080 Super', 320, alta, 16, 310, 1000). 
+gpu(gpu_rtx5080,        nvidia, 'GeForce RTX 5080',   360,  alta,  16, 304, 1300). 
+gpu(gpu_rtx5090,        nvidia, 'GeForce RTX 5090',   575,  alta,  32, 336, 2400). 
 
-pref_gaming_resolucion('1080p_60hz'). pref_gaming_juegos(esports). pref_gaming_prioridad(gpu).
-pref_edicion_software(premiere). pref_edicion_resolucion('1080p'). pref_edicion_prioridad(render_gpu).
-pref_prog_area(web_movil). pref_prog_entorno(ligero). pref_prog_monitores(uno).
-pref_maestro_tareas(ofimatica). pref_maestro_formato(torre). pref_maestro_ram('16gb').
-
-% ------------------------------------------------------------
-% 3. REGLAS DE COMPATIBILIDAD Y CÁLCULO
-% ------------------------------------------------------------
-compatible_socket(CPU_ID, MB_ID) :- cpu(CPU_ID, _, _, Socket, _, _, _, _), motherboard(MB_ID, _, _, Socket, _, _, _).
-compatible_ram(MB_ID, RAM_ID) :- motherboard(MB_ID, _, _, _, _, TipoDDR_MB, _), ram(RAM_ID, TipoDDR_RAM, _, _, _), TipoDDR_MB == TipoDDR_RAM.
-
-compatible_tier(CPU_ID, MB_ID) :- 
-    cpu(CPU_ID, _, _, _, _, _, GamaCPU, _),
-    motherboard(MB_ID, _, _, _, PrecioMB, _, _),
-    ( GamaCPU == baja -> PrecioMB =< 130 ; true ),
-    ( GamaCPU == media -> PrecioMB =< 180 ; true ), 
-    ( GamaCPU == alta -> (MB_ID \= mb_h610m, MB_ID \= mb_a520m) ; true ).
-
-consumo_estimado(CPU_ID, GPU_ID, Watts) :- cpu(CPU_ID, _, _, _, TDP_CPU, _, _, _), ( gpu(GPU_ID, _, _, TDP_GPU, _, _, _) -> true ; TDP_GPU = 0 ), Base is TDP_CPU + TDP_GPU, Watts is Base * 1.30.
-fuente_recomendada(CPU_ID, GPU_ID, Rango) :- consumo_estimado(CPU_ID, GPU_ID, Watts), Min is ceiling(Watts / 50) * 50, Max is Min + 100, atom_concat(Min, 'W - ', T1), atom_concat(T1, Max, T2), atom_concat(T2, 'W', Rango).
-
-cuello_botella(CPU_ID, GPU_ID) :- cpu(CPU_ID, _, _, _, _, _, baja, _), gpu(GPU_ID, _, _, _, _, alta, _).
-cuello_botella_inverso(CPU_ID, GPU_ID) :- cpu(CPU_ID, _, _, _, _, _, alta, _), gpu(GPU_ID, _, _, _, _, baja, _).
-
-% ------------------------------------------------------------
-% 4. REGLAS DE APTITUD POR USO
-% ------------------------------------------------------------
-cpu_apto_para(gaming, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama \= baja.
-cpu_apto_para(edicion, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama \= baja.
-cpu_apto_para(programacion, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, Gama, _), Gama \= baja.
-cpu_apto_para(maestro, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, _, si).
-cpu_apto_para(maestro, CPU_ID) :- cpu(CPU_ID, _, _, _, _, _, baja, _).
-
-gpu_apto_para(gaming, GPU_ID) :- 
-    gpu(GPU_ID, _, _, _, _, Gama, VRAM), 
-    Gama \= baja,
-    ( pref_gaming_juegos(vr) -> VRAM >= 12 ; true ).
-
-gpu_apto_para(edicion, GPU_ID) :- 
-    gpu(GPU_ID, _, _, _, _, Gama, VRAM), 
-    Gama \= baja, 
-    VRAM >= 8,
-    ( (pref_edicion_software(blender) ; pref_edicion_software(arquitectura_3d)) -> gpu(GPU_ID, nvidia, _, _, _, _, _) ; true ).
-
-gpu_apto_para(programacion, GPU_ID) :- gpu(GPU_ID, _, _, _, _, _, _).
-gpu_apto_para(programacion, 'integrada').
-gpu_apto_para(maestro, 'integrada').
+rend_gpu(integrada,10,15).
+rend_gpu(gpu_gtx1650,18,15).   rend_gpu(gpu_rx6400,15,12).    rend_gpu(gpu_arc_b580,45,40).
+rend_gpu(gpu_rx6600,40,30).    rend_gpu(gpu_rtx4060,42,45).   rend_gpu(gpu_rx7600,42,35).
+rend_gpu(gpu_rtx5060,45,48).   rend_gpu(gpu_rx7600xt,46,40).  rend_gpu(gpu_rx9060xt,55,50).
+rend_gpu(gpu_rtx5060ti,53,55). rend_gpu(gpu_rx6700xt,58,45).  rend_gpu(gpu_rx7700xt,62,55).
+rend_gpu(gpu_rx7800xt,68,60).  rend_gpu(gpu_rtx4070s,72,75).  rend_gpu(gpu_rx9070,75,70).
+rend_gpu(gpu_rtx5070,72,75).   rend_gpu(gpu_rx9070xt,82,78).  rend_gpu(gpu_rtx5070ti,85,88).
+rend_gpu(gpu_rtx4080s,90,92).  rend_gpu(gpu_rtx5080,96,96).   rend_gpu(gpu_rtx5090,100,100).
 
 % ------------------------------------------------------------
-% 5. PUNTAJES Y BONIFICACIONES
+% 3. Placas madre
 % ------------------------------------------------------------
-puntaje_cpu(gaming, baja, 0). puntaje_cpu(gaming, media, 2). puntaje_cpu(gaming, alta, 3).
-puntaje_cpu(programacion, baja, 1). puntaje_cpu(programacion, media, 2). puntaje_cpu(programacion, alta, 3).
-puntaje_cpu(edicion, baja, 0). puntaje_cpu(edicion, media, 2). puntaje_cpu(edicion, alta, 3).
-% El i5 (media) vale 4, el i7/Ryzen 9 (alta) vale 2 para que el sistema prefiera el i5 en maestros.
-puntaje_cpu(maestro, baja, 1). puntaje_cpu(maestro, media, 3). puntaje_cpu(maestro, alta, 4).
-
-puntaje_gpu(gaming, baja, 0). puntaje_gpu(gaming, media, 2). puntaje_gpu(gaming, alta, 3).
-puntaje_gpu(programacion, baja, 1). puntaje_gpu(programacion, media, 1). puntaje_gpu(programacion, alta, 0). puntaje_gpu(programacion, 'integrada', 4).
-puntaje_gpu(edicion, baja, 0). puntaje_gpu(edicion, media, 2). puntaje_gpu(edicion, alta, 3).
-puntaje_gpu(maestro, baja, 3). puntaje_gpu(maestro, media, 1). puntaje_gpu(maestro, alta, 0).
-puntaje_gpu(_, 'integrada', 1).
-
-bonus_gaming_prioridad_gpu(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, alta, _).
-bonus_gaming_prioridad_cpu(CPU_ID, 5) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
-bonus_gaming_resolucion(GPU_ID, 3) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
-bonus_gaming_vr(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
-
-bonus_edicion_resolucion(GPU_ID, 5) :- gpu(GPU_ID, _, _, _, _, _, VRAM), VRAM >= 12.
-bonus_edicion_prioridad_gpu(GPU_ID, 4) :- gpu(GPU_ID, _, _, _, _, alta, _).
-
-bonus_prog_entorno_pesado(CPU_ID, 3) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
-bonus_prog_ciberseguridad(CPU_ID, 4) :- cpu(CPU_ID, _, _, _, _, _, alta, _).
-
-bonus_maestro_docencia(RAM_ID, 3) :- ram(RAM_ID, _, Cap, _, _), Cap >= 16.
-
-% --- RAM (Puntaje Universal) ---
-puntaje_ram(gaming, 8, -10). puntaje_ram(gaming, 16, 3). puntaje_ram(gaming, 32, 5). puntaje_ram(gaming, 64, 6).
-puntaje_ram(edicion, 8, -10). puntaje_ram(edicion, 16, 2). puntaje_ram(edicion, 32, 5). puntaje_ram(edicion, 64, 7).
-puntaje_ram(programacion, 8, -5). puntaje_ram(programacion, 16, 3). puntaje_ram(programacion, 32, 5). puntaje_ram(programacion, 64, 6).
-
-% Puntaje para Maestro (ya está obligado a cumplir con la elección en build_valido)
-puntaje_ram(maestro, 8, 2).
-puntaje_ram(maestro, 16, 5).
-puntaje_ram(maestro, 32, 7).
-puntaje_ram(maestro, 64, 8).
-
-% --- Almacenamiento (Puntaje escalonado universal) ---
-puntaje_almacenamiento(Tipo, Cap, Puntaje) :-
-    ( Tipo == ssd_nvme -> Base = 5 ; Tipo == ssd_sata -> Base = 3 ; Tipo == hdd -> Base = -5 ),
-    ( Cap >= 4000 -> Bonus = 4 ; Cap >= 2000 -> Bonus = 3 ; Cap >= 1000 -> Bonus = 2 ; Cap >= 500 -> Bonus = 1 ; Bonus = 0 ),
-    Puntaje is Base + Bonus.
+motherboard(mb_a520m,     asus,    'PRIME A520M-K',           am4,    ddr4, matx, no, 70).
+motherboard(mb_b550m,     msi,     'B550M PRO-VDH',           am4,    ddr4, matx, no, 100).
+motherboard(mb_b550m_wifi,gigabyte,'B550M DS3H AX',           am4,    ddr4, matx, si, 120).
+motherboard(mb_b550_atx,  gigabyte,'B550 AORUS ELITE AX',     am4,    ddr4, atx,  si, 160).
+motherboard(mb_a620m,     asus,    'A620M-PLUS',              am5,    ddr5, matx, no, 100). 
+motherboard(mb_b650m,     gigabyte,'B650M DS3H',              am5,    ddr5, matx, no, 150).
+motherboard(mb_b650m_wifi,msi,     'PRO B650M-A WIFI',        am5,    ddr5, matx, si, 180).
+motherboard(mb_b550i_itx, asus,    'ROG STRIX B550-I GAMING', am4,    ddr4, itx,  si, 220). 
+motherboard(mb_b650i_itx, asus,    'ROG STRIX B650-I GAMING', am5,    ddr5, itx,  si, 260). 
+motherboard(mb_b650_atx,  asus,    'TUF GAMING B650-PLUS WIFI', am5,  ddr5, atx,  si, 200). 
+motherboard(mb_b850_atx,  gigabyte,'B850 AORUS ELITE WIFI7',  am5,    ddr5, atx,  si, 230). 
+motherboard(mb_h610m,     asus,    'PRIME H610M-E',           lga1700,ddr4, matx, no, 90).
+motherboard(mb_b760m,     msi,     'PRO B760M-A',             lga1700,ddr5, matx, no, 130).
+motherboard(mb_b760m_wifi,gigabyte,'B760M DS3H AX',           lga1700,ddr5, matx, si, 160).
+motherboard(mb_z790,      gigabyte,'Z790 EAGLE AX',           lga1700,ddr5, atx,  si, 200).
+motherboard(mb_b860m,     msi,     'MAG B860M MORTAR WIFI',   lga1851,ddr5, matx, si, 180). 
+motherboard(mb_z890,      gigabyte,'Z890 AORUS ELITE',        lga1851,ddr5, atx,  si, 300). 
 
 % ------------------------------------------------------------
-% 6. REGLA MAESTRA Y RESTRICCIONES
+% 4. RAM
 % ------------------------------------------------------------
-presupuesto_suficiente(Uso, Presupuesto) :- presupuesto_minimo(Uso, Min), Presupuesto >= Min.
+ram(ram_ddr4_8gb_3200,  ddr4, 8,  3200, 35).
+ram(ram_ddr4_16gb_3200, ddr4, 16, 3200, 70).
+ram(ram_ddr4_32gb_3600, ddr4, 32, 3600, 150).   
+ram(ram_ddr5_16gb_5600, ddr5, 16, 5600, 130).   
+ram(ram_ddr5_32gb_5600, ddr5, 32, 5600, 380).   
+ram(ram_ddr5_32gb_6000, ddr5, 32, 6000, 420).   
+ram(ram_ddr5_64gb_6000, ddr5, 64, 6000, 850).   
+ram(ram_ddr4_16gb_3600, ddr4, 16, 3600, 85).    
+ram(ram_ddr4_32gb_3200, ddr4, 32, 3200, 140).   
+ram(ram_ddr5_16gb_6000, ddr5, 16, 6000, 190).   
 
-costo_total(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Total) :-
-    cpu(CPU_ID, _, _, _, _, P_CPU, _, _),
-    ( GPU_ID == 'integrada' -> P_GPU = 0 ; gpu(GPU_ID, _, _, _, P_GPU, _, _) ),
-    motherboard(MB_ID, _, _, _, P_MB, _, _),
-    ram(RAM_ID, _, _, _, P_RAM),
-    almacenamiento(ALM_ID, _, _, P_ALM),
-    Total is P_CPU + P_GPU + P_MB + P_RAM + P_ALM.
+% ------------------------------------------------------------
+% 5. Almacenamiento
+% ------------------------------------------------------------
+almacenamiento(alm_hdd_1tb,        hdd,       1000,  55).   
+almacenamiento(alm_hdd_4tb,        hdd,       4000, 100).   
+almacenamiento(alm_ssd_sata_500gb, ssd_sata,   500,  45).   
+almacenamiento(alm_ssd_sata_1tb,   ssd_sata,  1000,  75).   
+almacenamiento(alm_nvme3_500gb,    ssd_nvme3,  500,  50).   
+almacenamiento(alm_nvme4_500gb,    ssd_nvme4,  500,  60).   
+almacenamiento(alm_nvme4_1tb,      ssd_nvme4, 1000, 100).   
+almacenamiento(alm_nvme4_2tb,      ssd_nvme4, 2000, 170).   
+almacenamiento(alm_nvme4_4tb,      ssd_nvme4, 4000, 340).   
+almacenamiento(alm_nvme5_1tb,      ssd_nvme5, 1000, 150).   
+almacenamiento(alm_nvme5_2tb,      ssd_nvme5, 2000, 260).   
 
-dentro_presupuesto(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto) :-
-    costo_total(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Total),
-    Total =< Presupuesto.
+% ------------------------------------------------------------
+% 6. Fuentes
+% ------------------------------------------------------------
+fuente(f_500w,  evga,    'EVGA 500 BR 80+ Bronze',       500,  bronze,   no, 50).
+fuente(f_550w,  corsair, 'CX550 80+ Bronze',             550,  bronze,   no, 55).
+fuente(f_650w,  corsair, 'RM650e 80+ Gold ATX 3.1',      650,  gold,     si, 90).
+fuente(f_750w,  corsair, 'RM750e 80+ Gold ATX 3.1',      750,  gold,     si, 115).
+fuente(f_850w,  corsair, 'RM850e 80+ Gold ATX 3.1',      850,  gold,     si, 130).
+fuente(f_1000w, corsair, 'RM1000e 80+ Gold ATX 3.1',    1000,  gold,     si, 170).
+fuente(f_1200w, corsair, 'AX1200 80+ Titanium',         1200,  titanium, si, 300). 
+fuente(f_850w_gold, seasonic, 'Focus GX-850 80+ Gold',    850, gold,     no, 150). 
+fuente(f_1000w_plat, corsair, 'HX1000i 80+ Platinum',   1000, platinum, no, 220). 
 
-build_valido(Uso, CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto) :-
-    uso(Uso),
-    cpu_apto_para(Uso, CPU_ID),
-    gpu_apto_para(Uso, GPU_ID),
-    motherboard(MB_ID, _, _, _, _, _, _),
-    compatible_socket(CPU_ID, MB_ID),
-    compatible_tier(CPU_ID, MB_ID),
-    compatible_ram(MB_ID, RAM_ID),
-    almacenamiento(ALM_ID, _, _, _),
-    ram(RAM_ID, _, CapRam, _, _),
-    
-    % REGLA ESTRICTA: Respetar elección del usuario en Maestro
-    ( Uso == maestro -> 
-    ( (pref_maestro_ram('8gb') -> CapRam >= 8) ;
-      (pref_maestro_ram('16gb') -> CapRam >= 16) ;
-      (pref_maestro_ram('32gb') -> CapRam >= 32) )
-    ; ( (Uso == gaming ; Uso == edicion) -> CapRam >= 16 ; true ) 
-    ),
-    
-    ( GPU_ID == 'integrada' -> true ; 
-      \+ cuello_botella(CPU_ID, GPU_ID),
-      ( Uso == gaming -> \+ cuello_botella_inverso(CPU_ID, GPU_ID) ; true )
-    ),
-    dentro_presupuesto(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID, Presupuesto).
+% ------------------------------------------------------------
+% 7. Gabinetes
+% ------------------------------------------------------------
+gabinete(g_itx_nr200p, coolermaster, 'NR200P',           itx,  [itx],        330,  60, 110). 
+gabinete(g_matx_basico,generic,      'mATX basico',      matx, [matx, itx], 300, 150,  40). 
+gabinete(g_mid_h510,   nzxt,         'H510',             mid,  [atx, matx, itx], 381, 165,  90).
+gabinete(g_mid_4000d,  corsair,      '4000D Airflow',    mid,  [atx, matx, itx], 360, 170, 110). 
+gabinete(g_mid_lancool,lian_li,      'Lancool 216',      mid,  [atx, matx, itx], 384, 170, 120). 
+gabinete(g_mid_pop,    fractal,      'Pop Air',          mid,  [atx, matx, itx], 405, 170, 100). 
+gabinete(g_full_o11,   lian_li,      'O11 Dynamic EVO',  full, [atx, matx, itx], 420, 166, 150). 
+gabinete(g_mid_meshify, fractal, 'Meshify 2', mid, [atx, matx, itx], 467, 170, 150). 
+gabinete(g_matx_lancool205, lian_li, 'Lancool 205 Mesh', matx, [matx, itx], 330, 170, 90). 
 
-calcular_puntaje_total(Uso, CPU_ID, GPU_ID, _MB_ID, RAM_ID, ALM_ID, Puntaje) :-
-    cpu(CPU_ID, _, _, _, _, _, GC, _),
-    ( GPU_ID == 'integrada' -> GG = 'integrada' ; gpu(GPU_ID, _, _, _, _, GG, _) ),
-    ram(RAM_ID, _, Capacidad, _, _),
-    almacenamiento(ALM_ID, TipoAlm, CapAlm, _),
-    
-    puntaje_cpu(Uso, GC, PC), puntaje_gpu(Uso, GG, PG),
-    puntaje_ram(Uso, Capacidad, PRAM), puntaje_almacenamiento(TipoAlm, CapAlm, PAlm),
-    PuntajeBase is PC + PG + PRAM + PAlm,
-    
-    ( Uso == gaming -> sumar_bonus_gaming(GPU_ID, CPU_ID, Bonus) ;
-      Uso == edicion -> sumar_bonus_edicion(GPU_ID, Bonus) ;
-      Uso == programacion -> sumar_bonus_prog(CPU_ID, Bonus) ;
-      Uso == maestro -> sumar_bonus_maestro(RAM_ID, Bonus) ;
-      Bonus = 0 ),
-    Puntaje is PuntajeBase + Bonus.
+% ------------------------------------------------------------
+% 8. Coolers
+% ------------------------------------------------------------
+cooler(cool_stock,    stock, 'Cooler de caja (stock)',    65,   0,  0).
+cooler(cool_low,      aire,  'Noctua NH-L9i (Bajo perfil)', 95,  37, 50).
+cooler(cool_hyper212, aire,  'Hyper 212 Black',           160, 159, 45). 
+cooler(cool_nhd15,    aire,  'NH-D15',                    250, 165, 110). 
+cooler(cool_aio240,   aio,   'Corsair iCUE H100i 240mm',  250,   0, 120). 
+cooler(cool_aio360,   aio,   'Arctic Liquid Freezer III 360', 300,   0, 130). 
 
-sumar_bonus_gaming(GPU_ID, CPU_ID, Bonus) :-
-    ( bonus_gaming_prioridad_gpu(GPU_ID, B1) -> true ; B1 = 0 ),
-    ( bonus_gaming_prioridad_cpu(CPU_ID, B2) -> true ; B2 = 0 ),
-    ( bonus_gaming_resolucion(GPU_ID, B3) -> true ; B3 = 0 ),
-    ( pref_gaming_juegos(vr) -> bonus_gaming_vr(GPU_ID, B4) ; B4 = 0 ),
-    Bonus is B1 + B2 + B3 + B4.
+% ------------------------------------------------------------
+% 9. Nombres legibles
+% ------------------------------------------------------------
+nombre(integrada, 'Gráficos integrados (iGPU)') :- !.
+nombre(Id, N) :- cpu(Id, M, Mo, _, _, _, _, _, _, _), format(atom(N), '~w ~w', [M, Mo]).
+nombre(Id, N) :- gpu(Id, _, Mo, _, _, V, _, _), format(atom(N), '~w (~wGB VRAM)', [Mo, V]).
+nombre(Id, N) :- motherboard(Id, M, Mo, _, _, _, _, _), format(atom(N), '~w ~w', [M, Mo]).
+nombre(Id, N) :- ram(Id, T, C, F, _), format(atom(N), '~wGB ~w ~wMHz', [C, T, F]).
+nombre(Id, N) :- almacenamiento(Id, T, C, _), format(atom(N), '~wGB ~w', [C, T]).
+nombre(Id, N) :- fuente(Id, M, Mo, W, _, _, _), format(atom(N), '~w ~w (~wW)', [M, Mo, W]).
+nombre(Id, N) :- gabinete(Id, M, Mo, T, _, _, _, _), format(atom(N), '~w ~w (~w)', [M, Mo, T]).
+nombre(Id, N) :- cooler(Id, _, Mo, _, _, _), format(atom(N), '~w', [Mo]).
 
-sumar_bonus_edicion(GPU_ID, Bonus) :-
-    ( bonus_edicion_resolucion(GPU_ID, B1) -> true ; B1 = 0 ),
-    ( bonus_edicion_prioridad_gpu(GPU_ID, B2) -> true ; B2 = 0 ),
-    Bonus is B1 + B2.
+% ------------------------------------------------------------
+% 10. Perfiles y Utilidades
+% ------------------------------------------------------------
+perfil(economica,   0.70, 'Económica').
+perfil(equilibrada, 0.90, 'Equilibrada').
+perfil(maximo,      1.00, 'Máximo rendimiento').
 
-sumar_bonus_prog(CPU_ID, Bonus) :-
-    ( bonus_prog_entorno_pesado(CPU_ID, B1) -> true ; B1 = 0 ),
-    ( pref_prog_area(ciberseguridad) -> bonus_prog_ciberseguridad(CPU_ID, B2) ; B2 = 0 ),
-    Bonus is B1 + B2.
+presupuesto_minimo(gaming, 650).
+presupuesto_minimo(edicion, 800).
+presupuesto_minimo(programacion, 500).
+presupuesto_minimo(maestro, 400).
+presupuesto_suficiente(Uso, P) :- presupuesto_minimo(Uso, Min), P >= Min.
 
-sumar_bonus_maestro(RAM_ID, Bonus) :-
-    ( pref_maestro_tareas(docencia_virtual) -> bonus_maestro_docencia(RAM_ID, B1) ; B1 = 0 ),
-    Bonus is B1.
+pref_def(K, D, V) :- ( pref(K, X) -> V = X ; V = D ).
 
-mejor_build(Uso, Presupuesto, CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID) :-
-    findall(PuntajeTotal-build(C, G, M, R, A),
-            ( build_valido(Uso, C, G, M, R, A, Presupuesto),
-              calcular_puntaje_total(Uso, C, G, M, R, A, Puntaje),
-              costo_total(C, G, M, R, A, Costo),
-              PuntajeTotal is Puntaje * 10000 + Costo ),
-            Lista),
-    Lista \= [],
-    predsort(compare_desc, Lista, [_-build(CPU_ID, GPU_ID, MB_ID, RAM_ID, ALM_ID)|_]).
+precio(cpu, Id, P) :- cpu(Id, _, _, _, _, _, _, _, _, P).
+precio(gpu, Id, P) :- gpu(Id, _, _, _, _, _, _, P).
+precio(mb,  Id, P) :- motherboard(Id, _, _, _, _, _, _, P).
+precio(ram, Id, P) :- ram(Id, _, _, _, P).
+precio(alm, Id, P) :- almacenamiento(Id, _, _, P).
+precio(psu, Id, P) :- fuente(Id, _, _, _, _, _, P).
+precio(gab, Id, P) :- gabinete(Id, _, _, _, _, _, _, P).
+precio(cool, Id, P) :- cooler(Id, _, _, _, _, P).
 
-compare_desc(Order, A-_, B-_) :- compare(Order, B, A).
+reusa(ram) :- pref_def(reutiliza, ninguno, X), member(X, [ram_ddr4, ram_ddr5]).
+reusa(alm) :- pref_def(reutiliza, ninguno, ssd).
+costo(ram, _, 0) :- reusa(ram), !.
+costo(alm, _, 0) :- reusa(alm), !.
+costo(Tipo, Id, P) :- precio(Tipo, Id, P).
+
+tdp_cpu(C, T) :- cpu(C, _, _, _, T, _, _, _, _, _).
+tdp_gpu(G, T) :- gpu(G, _, _, T, _, _, _, _).
+
+cert_rank(titanium, 3). cert_rank(platinum, 2). cert_rank(gold, 1). cert_rank(bronze, 0).
+
+% ------------------------------------------------------------
+% 12. Restricciones y Filtros
+% ------------------------------------------------------------
+marca_ok(Marca) :- pref_def(marca_cpu, indiferente, M), ( M == indiferente -> true ; M == Marca ).
+
+cpu_uso_ok(gaming, Nuc, Gama, _) :- Gama \== baja, pref_def(gaming_streaming, no, S), ( S == si -> Nuc >= 8 ; true ).
+cpu_uso_ok(edicion, Nuc, Gama, _) :- Gama \== baja, pref_def(edicion_frecuencia, pocas, F), ( F == diario -> Nuc >= 8 ; true ).
+cpu_uso_ok(programacion, Nuc, Gama, _) :-
+    Gama \== baja,
+    ( pref_def(prog_area, web_movil, A), member(A, [ciberseguridad, backend_cloud]) -> Nuc >= 8 ; true ),
+    ( pref_def(prog_vms, no, V), V == siempre -> Nuc >= 8 ; true ).
+cpu_uso_ok(maestro, _, _, Gr) :- Gr == si.
+
+valor_cpu(gaming, RJ, _, RJ). valor_cpu(edicion, _, RT, RT). valor_cpu(programacion, _, RT, RT). valor_cpu(maestro, _, RT, RT).
+
+objetivo(gaming, cpu, O) :- pref_def(gaming_prioridad, equilibrado, P), ( P == cpu -> O = 100 ; P == gpu -> O = 60 ; O = 80 ).
+objetivo(gaming, gpu, O) :- pref_def(gaming_prioridad, equilibrado, P), ( P == gpu -> O = 100 ; P == cpu -> O = 60 ; O = 80 ).
+objetivo(edicion, cpu, O) :- pref_def(edicion_prioridad, render_gpu, P), ( P == render_cpu -> O = 100 ; O = 70 ).
+objetivo(edicion, gpu, O) :- pref_def(edicion_prioridad, render_gpu, P), ( P == render_gpu -> O = 100 ; O = 60 ).
+objetivo(programacion, cpu, 70). objetivo(programacion, gpu, 40).
+objetivo(maestro, cpu, 60). objetivo(maestro, gpu, 10).
+
+vram_min_gaming(_, vr, 12) :- !.
+vram_min_gaming('4k', _, 12) :- !.
+vram_min_gaming('1440p', esports, 8) :- !.
+vram_min_gaming('1440p', _, 12) :- !.
+vram_min_gaming(_, _, 8).
+
+tiene_igpu(CPU) :- cpu(CPU, _, _, _, _, _, _, _, si, _).
+gpu_uso_ok(maestro, Id, _, _, _) :- Id == integrada.
+gpu_uso_ok(programacion, Id, _, _, _) :- 
+    Id == integrada, 
+    pref_def(prog_ia_local, no, no).
+gpu_uso_ok(programacion, Id, _, VRAM, Marca) :-
+    Id \== integrada, pref_def(prog_ia_local, no, IA),
+    ( IA == grande -> VRAM >= 16 ; IA == pequeno -> VRAM >= 8 ; true ),
+    ( pref_def(prog_area, web_movil, A), A == data_ia -> Marca == nvidia ; true ).
+gpu_uso_ok(gaming, Id, Gama, VRAM, _) :-
+    Id \== integrada, Gama \== baja,
+    pref_def(gaming_resolucion, '1080p', R), pref_def(gaming_juegos, esports, J),
+    vram_min_gaming(R, J, Min), VRAM >= Min.
+gpu_uso_ok(edicion, Id, Gama, VRAM, Marca) :-
+    Id \== integrada, Gama \== baja, VRAM >= 8,
+    pref_def(edicion_resolucion, '1080p', R), rend_gpu(Id, _, RT),
+    ( R == '4k' -> VRAM >= 12, RT >= 55 ; R == '8k' -> VRAM >= 16, RT >= 75 ; true ),
+    pref_def(edicion_software, premiere, S),
+    ( (S == blender ; S == arquitectura_3d) -> Marca == nvidia ; true ).
+
+valor_gpu(gaming, RJ, _, RJ). valor_gpu(edicion, _, RT, RT). valor_gpu(programacion, _, RT, RT). valor_gpu(maestro, _, RT, RT).
+
+compatible_cuello(_, _, integrada) :- !.
+compatible_cuello(Uso, C, G) :-
+    cpu(C, _, _, _, _, _, _, Gc, _, _), gpu(G, _, _, _, Gg, _, _, _),
+    \+ (Gc == baja, Gg == alta),
+    ( Uso == gaming -> \+ (Gc == alta, Gg == baja) ; true ),
+    rend_cpu(C, CJ, CT), rend_gpu(G, GJ, GT),
+    ( Uso == gaming -> RC = CJ, RG = GJ ; RC = CT, RG = GT ),
+    ( Uso == gaming -> RG - RC =< 25 ; RG - RC =< 35 ),
+    RC - RG =< 50.
+
+% ------------------------------------------------------------
+% 13. Listas Ordenadas
+% ------------------------------------------------------------
+ordenar(Pares, Lista) :- keysort(Pares, Ord), pairs_values(Ord, Lista).
+
+lista_cpu(Uso, Lista) :-
+    findall(K-Id, ( cpu(Id, Marca, _, _, _, Nuc, _, Gama, Gr, _),
+          marca_ok(Marca), cpu_uso_ok(Uso, Nuc, Gama, Gr),
+          rend_cpu(Id, RJ, RT), valor_cpu(Uso, RJ, RT, V),
+          objetivo(Uso, cpu, Obj), K is abs(V - Obj) ), Pares),
+    ordenar(Pares, Lista).
+
+lista_gpu(Uso, Lista) :-
+    findall(K-Id, ( gpu(Id, Marca, _, _, Gama, VRAM, _, _),
+          gpu_uso_ok(Uso, Id, Gama, VRAM, Marca),
+          rend_gpu(Id, RJ, RT), valor_gpu(Uso, RJ, RT, V),
+          objetivo(Uso, gpu, Obj), K is abs(V - Obj) ), Pares),
+    ordenar(Pares, Lista).
+
+chipset_basico(mb_a520m). chipset_basico(mb_a620m). chipset_basico(mb_h610m).
+gpu_fuerte(G) :- gpu(G, _, _, _, _, VRAM, _, P), (VRAM >= 12 ; P >= 250).
+
+lista_mb(Uso, C, Lista) :-
+    cpu(C, _, _, Socket, _, _, _, Gama, _, _),
+    findall(K-Id, ( motherboard(Id, _, _, Socket, Tipo, Form, WiFi, P),
+          formato_mb_ok(Form), tipo_mb_reuso_ok(Tipo), wifi_ok(Uso, WiFi),
+          ( Gama == alta -> \+ chipset_basico(Id) ; true ),
+          ( Uso == maestro -> K = P ; K is -P ) ), Pares),
+    ordenar(Pares, Lista).
+
+formato_mb_ok(Form) :- pref_def(tamano, indiferente, T),
+    ( T == mini -> Form == itx ; T == compacta -> member(Form, [matx, itx]) ; T == normal -> Form == atx ; true ).
+tipo_mb_reuso_ok(Tipo) :- pref_def(reutiliza, ninguno, R),
+    ( R == ram_ddr4 -> Tipo == ddr4 ; R == ram_ddr5 -> Tipo == ddr5 ; true ).
+wifi_ok(maestro, WiFi) :- pref_def(maestro_tareas, ofimatica, T), ( T == docencia_virtual -> WiFi == si ; true ).
+wifi_ok(_, _).
+
+ram_req(gaming, M, I) :- 
+    pref_def(gaming_streaming, no, S), 
+    pref_def(gaming_resolucion, '1080p', R),
+    ( (S == si ; R == '4k') -> M = 32, I = 32 ; M = 16, I = 32 ).
+
+ram_req(edicion, M, I) :- pref_def(edicion_resolucion, '1080p', R),
+    ( R == '8k' -> M = 64, I = 64 ; R == '4k' -> M = 32, I = 32 ; M = 16, I = 32 ).
+ram_req(programacion, M, I) :- pref_def(prog_vms, no, V), pref_def(prog_ia_local, no, IA), pref_def(prog_area, web_movil, A),
+    ( (V == siempre ; IA == grande ; A == videojuegos) -> M = 32, I = 32 ; M = 16, I = 32 ).
+ram_req(maestro, M, M) :- pref_def(maestro_ram, '16gb', R), ( R == '8gb' -> M = 8 ; R == '32gb' -> M = 32 ; M = 16 ).
+
+lista_ram(Uso, M, Lista) :-
+    motherboard(M, _, _, _, Tipo, _, _, _),
+    ram_req(Uso, Min, Ideal),
+    findall(K-Id, ( ram(Id, Tipo, Cap, _, _), Cap >= Min, K is abs(Cap - Ideal) ), Pares),
+    ordenar(Pares, Lista).
+
+typepen(ssd_nvme5, 20). typepen(ssd_nvme4, 0). typepen(ssd_nvme3, 50). typepen(ssd_sata, 1500). typepen(hdd, 3000).
+
+alm_req(gaming, 500, 1000). alm_req(edicion, 1000, 2000). alm_req(programacion, 500, 1000). alm_req(maestro, 500, 500).
+
+lista_alm(Uso, Lista) :-
+    alm_req(Uso, Min, Ideal),
+    findall(K-Id, ( almacenamiento(Id, Tipo, Cap, _), Cap >= Min,
+          ( Tipo == hdd -> Uso == maestro ; true ),
+          ( (Uso == edicion ; Uso == programacion) -> Tipo \== ssd_sata ; true ),
+          typepen(Tipo, Pen), K is abs(Cap - Ideal) + Pen ), Pares),
+    ordenar(Pares, Lista).
+
+lista_psu(_, TC, TG, G, Lista) :-
+    W is ceiling(1.3 * (TC + TG)),
+    precio(gpu, G, P_Gpu),
+    ( (TG >= 300 ; P_Gpu >= 200) -> WMin = 650, CertMin = gold ; WMin = W, CertMin = bronze ), 
+    findall(K-Id, ( 
+          fuente(Id, _, _, Watts, Cert, Atx3, P),
+          Watts >= WMin, 
+          cert_rank(Cert, R), cert_rank(CertMin, RMin), R >= RMin,
+          ( TG >= 300 -> Atx3 == si ; true ),
+          K is P  
+        ), Pares),
+    ordenar(Pares, Lista).
+
+lista_gab(Uso, M, G, Lista) :-
+    motherboard(M, _, _, _, _, FormMB, _, _),
+    gpu(G, _, _, _, _, _, LongG, _),
+    findall(K-Id, ( gabinete(Id, _, _, Tam, Forms, MaxGPU, _, P),
+          member(FormMB, Forms), LongG =< MaxGPU, tamano_gab_ok(Tam),
+          rango_tamano(Tam, R),
+          ( Uso == maestro -> K = P ; K is R * 1000 + P ) ), Pares),
+    ordenar(Pares, Lista).
+
+tamano_gab_ok(Tam) :- pref_def(tamano, indiferente, T),
+    ( T == mini -> Tam == itx ; T == compacta -> member(Tam, [matx, itx]) ; T == normal -> member(Tam, [mid, full]) ; true ).
+rango_tamano(full, 0). rango_tamano(mid, 1). rango_tamano(matx, 2). rango_tamano(itx, 3).
+
+
+lista_cool(C, B, Lista) :-
+    tdp_cpu(C, Tc),
+    cpu(C, _, _, _, _, _, _, Gama, _, _),
+    ( Gama == alta -> ExigirBueno = si ; ExigirBueno = no ), 
+    gabinete(B, _, _, _, _, _, MaxCool, _),
+    findall(K-Id, ( 
+          cooler(Id, _, _, TDPMax, Alt, P),
+          TDPMax >= Tc, 
+          ( ExigirBueno == si -> Id \== cool_stock ; true ), 
+          ( Alt > 0 -> Alt =< MaxCool ; true ), K = P ), Pares),
+    ordenar(Pares, Lista).
+
+% ------------------------------------------------------------
+% 14. Búsqueda con Poda (Backtracking)
+% ------------------------------------------------------------
+par_piezas(Uso, Cap, C, G, Gasto) :-
+    primero_gpu(Uso), !,
+    lista_gpu(Uso, Gs), member(G, Gs), precio(gpu, G, Pg), Pg =< Cap,
+    lista_cpu(Uso, Cs), member(C, Cs), compatible_cuello(Uso, C, G),
+    ( G == integrada -> tiene_igpu(C) ; true ), 
+    precio(cpu, C, Pc), Gasto is Pc + Pg, Gasto =< Cap.
+par_piezas(Uso, Cap, C, G, Gasto) :-
+    lista_cpu(Uso, Cs), member(C, Cs), precio(cpu, C, Pc), Pc =< Cap,
+    lista_gpu(Uso, Gs), member(G, Gs), compatible_cuello(Uso, C, G),
+    ( G == integrada -> tiene_igpu(C) ; true ),
+    precio(gpu, G, Pg), Gasto is Pc + Pg, Gasto =< Cap.
+
+primero_gpu(gaming) :- pref_def(gaming_prioridad, equilibrado, gpu).
+primero_gpu(edicion) :- pref_def(edicion_prioridad, render_gpu, render_gpu).
+
+resto(Uso, Cap, C, G, Gasto0, M, R, A, F, B, K, Total) :-
+    lista_mb(Uso, C, Ms), member(M, Ms),  ( (gpu_fuerte(G), chipset_basico(M)) -> fail ; true ), costo(mb, M, Pm),
+    G1 is Gasto0 + Pm, G1 =< Cap,
+    lista_ram(Uso, M, Rs), member(R, Rs), costo(ram, R, Pr),
+    G2 is G1 + Pr, G2 =< Cap,
+    lista_alm(Uso, As), member(A, As), costo(alm, A, Pa),
+    G3 is G2 + Pa, G3 =< Cap,
+    tdp_cpu(C, Tc), tdp_gpu(G, Tg),
+    lista_psu(Uso, Tc, Tg, G, Fs), member(F, Fs), precio(psu, F, Pf),
+    G4 is G3 + Pf, G4 =< Cap,
+    lista_gab(Uso, M, G, Bs), member(B, Bs), precio(gab, B, Pb),
+    G5 is G4 + Pb, G5 =< Cap,
+    lista_cool(C, B, Ks), member(K, Ks), precio(cool, K, Pk),
+    Total is G5 + Pk, Total =< Cap.
+
+mejor_build(Uso, Perfil, Pres, C, G, M, R, A, F, B, K, Total) :-
+    perfil(Perfil, Fr, _), Cap is Pres * Fr,
+    par_piezas(Uso, Cap, C, G, Gasto0),
+    resto(Uso, Cap, C, G, Gasto0, M, R, A, F, B, K, Total), !.
+
+consumo_sistema(C, G, W) :- tdp_cpu(C, Tc), tdp_gpu(G, Tg), W is (Tc + Tg) * 1.3.

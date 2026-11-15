@@ -1,140 +1,233 @@
 package app;
 
 import app.servicio.PrologService;
+
 import javax.swing.*;
+import java.awt.*;
 import java.util.Map;
 
 public class Main {
+
+    private static final class Opcion {
+        final String texto, valor;
+        Opcion(String texto, String valor) { this.texto = texto; this.valor = valor; }
+    }
+
     public static void main(String[] args) {
         PrologService servicio;
         try {
             servicio = new PrologService();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error crítico al cargar Prolog: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error al cargar Prolog:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        JOptionPane.showMessageDialog(null, 
-            "Bienvenido a PC Builder Expert.\n\nTe ayudaremos a elegir los mejores componentes para tu computadora.", 
-            "Sistema Experto", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null,
+            "Bienvenido a PC Builder Expert.\n\nResponde unas preguntas y te recomendaré el mejor armado posible para tu presupuesto.",
+            "PC Builder Expert", JOptionPane.INFORMATION_MESSAGE);
 
-        String[] opcionesUso = {"gaming", "programacion", "edicion", "maestro"};
-        String usoSeleccionado = (String) JOptionPane.showInputDialog(null, "¿Cuál es el uso principal que le darás a tu PC?", "Paso 1: Uso", JOptionPane.QUESTION_MESSAGE, null, opcionesUso, opcionesUso[0]);
-        
-        if (usoSeleccionado == null) return;
+        Opcion[] usos = {
+            new Opcion("Gaming", "gaming"),
+            new Opcion("Edición de video, 3D o fotos", "edicion"),
+            new Opcion("Programación", "programacion"),
+            new Opcion("Oficina, clases y estudio", "maestro")
+        };
+        Opcion uso = elegir("¿Cuál es el uso principal de tu PC?", "Paso 1: Uso", usos);
+        if (uso == null) return;
 
-        String inputPresupuesto = JOptionPane.showInputDialog(null, "¿Cuál es tu presupuesto en dólares (USD)?\n(Ejemplo: 800)", "Paso 2: Presupuesto", JOptionPane.QUESTION_MESSAGE);
-        if (inputPresupuesto == null || inputPresupuesto.trim().isEmpty()) return;
+        Opcion[] perifericos = {
+            new Opcion("Ninguno, ya tengo todo", "0"),
+            new Opcion("Solo monitor (~$120)", "120"),
+            new Opcion("Monitor, teclado y ratón (~$180)", "180")
+        };
+        Opcion peri = elegir("¿Qué periféricos ya tienes? (los que falten se suman al costo)", "Paso 2: Periféricos", perifericos);
+        if (peri == null) return;
+        double costoPeri = Double.parseDouble(peri.valor);
 
-        double presupuesto;
+        String entrada = JOptionPane.showInputDialog(null,
+            "¿Cuál es tu presupuesto total en USD (incluye periféricos si los vas a comprar)?\nEjemplo: 1000",
+            "Paso 3: Presupuesto", JOptionPane.QUESTION_MESSAGE);
+        if (entrada == null || entrada.trim().isEmpty()) return;
+        double presupuestoTotal;
         try {
-            presupuesto = Double.parseDouble(inputPresupuesto);
+            presupuestoTotal = Double.parseDouble(entrada.trim().replace(",", "."));
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Por favor, ingresa un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Escribe solo un número, por ejemplo 1000.", "Dato inválido", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        if (presupuestoTotal <= 0) return;
+        double presupuestoTorre = presupuestoTotal - costoPeri;
 
-        if (!servicio.presupuestoEsSuficiente(usoSeleccionado, presupuesto)) {
-            JOptionPane.showMessageDialog(null, "El presupuesto de $" + presupuesto + " es demasiado bajo para un uso de tipo: " + usoSeleccionado + ".\nPor favor, intenta con un presupuesto más alto.", "Presupuesto Insuficiente", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+        Opcion[] reutiliza = {
+            new Opcion("No, compro todo", "ninguno"),
+            new Opcion("Tengo RAM DDR4", "ram_ddr4"),
+            new Opcion("Tengo RAM DDR5", "ram_ddr5"),
+            new Opcion("Tengo un SSD", "ssd")
+        };
+        Opcion reu = elegir("¿Tienes alguna pieza que puedas reutilizar?\n(no se suma su costo; la placa se elige compatible)", "Paso 4: Reutilizar", reutiliza);
+        if (reu == null) return;
+
+        Opcion[] tamanos = {
+            new Opcion("Normal (ATX)", "normal"),
+            new Opcion("Compacta (mATX)", "compacta"),
+            new Opcion("Mini (ITX, muy pequeña)", "mini"),
+            new Opcion("Sin preferencia", "indiferente")
+        };
+        Opcion tam = elegir("¿Qué tamaño de PC prefieres?", "Paso 5: Tamaño", tamanos);
+        if (tam == null) return;
+
+        Opcion[] marcas = {
+            new Opcion("Sin preferencia", "indiferente"),
+            new Opcion("Intel", "intel"),
+            new Opcion("AMD", "amd")
+        };
+        Opcion marca = elegir("¿Prefieres alguna marca de procesador?", "Paso 6: Marca", marcas);
+        if (marca == null) return;
 
         servicio.limpiarPreferencias();
-        hacerPreguntasDinamicas(servicio, usoSeleccionado);
+        servicio.insertarPreferencia("tamano", tam.valor);
+        servicio.insertarPreferencia("marca_cpu", marca.valor);
+        servicio.insertarPreferencia("reutiliza", reu.valor);
+        preguntasDelUso(servicio, uso.valor);
 
-        Map<String, String> build = servicio.obtenerMejorBuild(usoSeleccionado, presupuesto);
-
-        if (build == null) {
-            JOptionPane.showMessageDialog(null, "No se encontró una combinación compatible para ese presupuesto.", "Sin Resultados", JOptionPane.WARNING_MESSAGE);
+        if (!servicio.presupuestoEsSuficiente(uso.valor, presupuestoTorre)) {
+            JOptionPane.showMessageDialog(null,
+                String.format("Con $%.0f para la PC no alcanza para un equipo de tipo \"%s\".\nAumenta el presupuesto o cambia el uso.", presupuestoTorre, uso.texto),
+                "Presupuesto insuficiente", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String idCpu = build.get("cpu");
-        String idGpu = build.get("gpu");
-        String idMb = build.get("motherboard");
-        String idRam = build.get("ram");
-        String idAlm = build.get("almacenamiento");
+        Map<String, String> build = servicio.obtenerMejorBuild(uso.valor, presupuestoTorre);
+        if (build == null) {
+            JOptionPane.showMessageDialog(null,
+                "No encontré combinaciones compatibles con esas respuestas y ese presupuesto.\nPrueba con un presupuesto mayor o con opciones menos exigentes.",
+                "Sin resultados", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        String nombreCpu = servicio.obtenerNombreComponente("cpu", idCpu);
-        String nombreGpu = servicio.obtenerNombreComponente("gpu", idGpu);
-        String nombreMb = servicio.obtenerNombreComponente("motherboard", idMb);
-        String nombreRam = servicio.obtenerNombreComponente("ram", idRam);
-        String nombreAlm = servicio.obtenerNombreComponente("almacenamiento", idAlm);
-
-        double costoTotal = servicio.obtenerCostoTotal(idCpu, idGpu, idMb, idRam, idAlm);
-        double watts = servicio.obtenerConsumoEstimado(idCpu, idGpu);
-        String fuente = servicio.obtenerFuenteRecomendada(idCpu, idGpu);
-
-        String mensajeResultado = String.format(
-            "¡Tu Build Recomendado!\n\n" +
-            "CPU: %s\n" +
-            "Tarjeta Gráfica: %s\n" +
-            "Motherboard: %s\n" +
-            "RAM: %s\n" +
-            "Almacenamiento: %s\n\n" +
-            "Costo Total: $%.2f USD\n" +
-            "Consumo Estimado: %.0f W\n" +
-            "Fuente recomendada: %s\n\n" +
-            "Presupuesto usado: $%.2f / $%.2f",
-            nombreCpu, nombreGpu, nombreMb, nombreRam, nombreAlm, 
-            costoTotal, watts, fuente, costoTotal, presupuesto
-        );
-
-        JOptionPane.showMessageDialog(null, mensajeResultado, "Resultado del Sistema Experto", JOptionPane.INFORMATION_MESSAGE);
+        mostrarResultado(servicio, build, presupuestoTotal, costoPeri, peri.texto);
     }
 
-    private static void hacerPreguntasDinamicas(PrologService servicio, String uso) {
-        if (uso.equals("gaming")) {
-            String[] res = {"1080p_60hz", "1080p_144hz", "1440p_144hz", "4k_144hz"};
-            String r1 = (String) JOptionPane.showInputDialog(null, "¿A qué resolución y tasa de refresco apuntas?", "Gaming", JOptionPane.QUESTION_MESSAGE, null, res, res[0]);
-            if (r1 != null) servicio.insertarPreferencia("pref_gaming_resolucion", r1);
+    private static Opcion elegir(String pregunta, String titulo, Opcion[] opciones) {
+        String[] textos = new String[opciones.length];
+        for (int i = 0; i < opciones.length; i++) textos[i] = opciones[i].texto;
+        int i = JOptionPane.showOptionDialog(null, pregunta, titulo, JOptionPane.DEFAULT_OPTION,
+            JOptionPane.QUESTION_MESSAGE, null, textos, textos[0]);
+        return (i < 0) ? null : opciones[i];
+    }
 
-            String[] juegos = {"esports", "aaa", "simulacion", "vr"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué tipo de juegos disfrutas más?", "Gaming", JOptionPane.QUESTION_MESSAGE, null, juegos, juegos[0]);
-            if (r2 != null) servicio.insertarPreferencia("pref_gaming_juegos", r2);
+    private static void preguntasDelUso(PrologService s, String uso) {
+        switch (uso) {
+            case "gaming": {
+                Opcion juegos = elegir("¿Qué tipo de juegos disfrutas más?", "Gaming", new Opcion[]{
+                    new Opcion("Competitivos (Valorant, CS2, LoL)", "esports"),
+                    new Opcion("Juegos AAA (Cyberpunk, Starfield)", "aaa"),
+                    new Opcion("Simulación o estrategia", "simulacion"),
+                    new Opcion("Realidad virtual", "vr")});
+                if (juegos != null) s.insertarPreferencia("gaming_juegos", juegos.valor);
 
-            String[] prioridad = {"gpu", "cpu"};
-            String r3 = (String) JOptionPane.showInputDialog(null, "¿Prefieres gastar más en la Tarjeta Gráfica (GPU) o en el Procesador (CPU)?", "Gaming", JOptionPane.QUESTION_MESSAGE, null, prioridad, prioridad[0]);
-            if (r3 != null) servicio.insertarPreferencia("pref_gaming_prioridad", r3);
-            
-        } else if (uso.equals("edicion")) {
-            String[] software = {"premiere", "davinci", "blender", "arquitectura_3d", "fotografia"};
-            String r1 = (String) JOptionPane.showInputDialog(null, "¿Qué software usas más?", "Edición", JOptionPane.QUESTION_MESSAGE, null, software, software[0]);
-            if (r1 != null) servicio.insertarPreferencia("pref_edicion_software", r1);
+                Opcion res = elegir("¿A qué resolución quieres jugar?", "Gaming", new Opcion[]{
+                    new Opcion("1080p (Full HD)", "1080p"),
+                    new Opcion("1440p (2K)", "1440p"),
+                    new Opcion("4K", "4k")});
+                if (res != null) s.insertarPreferencia("gaming_resolucion", res.valor);
 
-            String[] res = {"1080p", "4k", "8k"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿En qué resolución editas principalmente?", "Edición", JOptionPane.QUESTION_MESSAGE, null, res, res[0]);
-            if (r2 != null) servicio.insertarPreferencia("pref_edicion_resolucion", r2);
+                Opcion prio = elegir("¿Qué prefieres invertir más?", "Gaming", new Opcion[]{
+                    new Opcion("Equilibrado", "equilibrado"),
+                    new Opcion("Priorizar tarjeta gráfica (GPU)", "gpu"),
+                    new Opcion("Priorizar procesador (CPU)", "cpu")});
+                if (prio != null) s.insertarPreferencia("gaming_prioridad", prio.valor);
+                break;
+            }
+            case "edicion": {
+                Opcion sw = elegir("¿Qué software usas más?", "Edición", new Opcion[]{
+                    new Opcion("Premiere o DaVinci Resolve (video)", "premiere"),
+                    new Opcion("Blender (render 3D)", "blender"),
+                    new Opcion("Arquitectura 3D (Revit, Lumion)", "arquitectura_3d"),
+                    new Opcion("Fotografía (Photoshop, Lightroom)", "fotografia")});
+                if (sw != null) s.insertarPreferencia("edicion_software", sw.valor);
 
-            String[] prioridad = {"render_gpu", "render_cpu"};
-            String r3 = (String) JOptionPane.showInputDialog(null, "¿Prefieres que el renderizado sea rápido por GPU (Tarjeta) o por CPU (Procesador)?", "Edición", JOptionPane.QUESTION_MESSAGE, null, prioridad, prioridad[0]);
-            if (r3 != null) servicio.insertarPreferencia("pref_edicion_prioridad", r3);
+                Opcion res = elegir("¿En qué resolución editas?", "Edición", new Opcion[]{
+                    new Opcion("1080p", "1080p"),
+                    new Opcion("4K", "4k"),
+                    new Opcion("8K o RAW", "8k")});
+                if (res != null) s.insertarPreferencia("edicion_resolucion", res.valor);
 
-        } else if (uso.equals("programacion")) {
-            String[] area = {"web_movil", "data_ia", "videojuegos", "ciberseguridad", "backend_cloud"};
-            String r1 = (String) JOptionPane.showInputDialog(null, "¿Qué tipo de desarrollo haces?", "Programación", JOptionPane.QUESTION_MESSAGE, null, area, area[0]);
-            if (r1 != null) servicio.insertarPreferencia("pref_prog_area", r1);
+                Opcion prio = elegir("Para renderizar, ¿qué pieza debe ser más rápida?", "Edición", new Opcion[]{
+                    new Opcion("Tarjeta gráfica (GPU)", "render_gpu"),
+                    new Opcion("Procesador (CPU)", "render_cpu")});
+                if (prio != null) s.insertarPreferencia("edicion_prioridad", prio.valor);
+                break;
+            }
+            case "programacion": {
+                Opcion area = elegir("¿Qué tipo de desarrollo haces?", "Programación", new Opcion[]{
+                    new Opcion("Web y móvil", "web_movil"),
+                    new Opcion("Ciencia de datos e IA", "data_ia"),
+                    new Opcion("Videojuegos (Unity, Unreal)", "videojuegos"),
+                    new Opcion("Ciberseguridad", "ciberseguridad"),
+                    new Opcion("Backend y cloud (Docker, Kubernetes)", "backend_cloud")});
+                if (area != null) s.insertarPreferencia("prog_area", area.valor);
 
-            String[] entorno = {"ligero", "pesado", "compilacion_pesada"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué tan pesado es tu entorno de desarrollo?", "Programación", JOptionPane.QUESTION_MESSAGE, null, entorno, entorno[0]);
-            if (r2 != null) servicio.insertarPreferencia("pref_prog_entorno", r2);
+                Opcion vms = elegir("¿Usas máquinas virtuales o Docker?", "Programación", new Opcion[]{
+                    new Opcion("No", "no"),
+                    new Opcion("A veces", "aveces"),
+                    new Opcion("Todo el tiempo", "siempre")});
+                if (vms != null) s.insertarPreferencia("prog_vms", vms.valor);
 
-            String[] monitores = {"uno", "dos", "tres_o_mas"};
-            String r3 = (String) JOptionPane.showInputDialog(null, "¿Cuántos monitores piensas conectar?", "Programación", JOptionPane.QUESTION_MESSAGE, null, monitores, monitores[0]);
-            if (r3 != null) servicio.insertarPreferencia("pref_prog_monitores", r3);
+                Opcion ia = elegir("¿Ejecutas modelos de IA en tu propia PC?", "Programación", new Opcion[]{
+                    new Opcion("No", "no"),
+                    new Opcion("Modelos pequeños", "pequeno"),
+                    new Opcion("Modelos grandes", "grande")});
+                if (ia != null) s.insertarPreferencia("prog_ia_local", ia.valor);
+                break;
+            }
+            case "maestro": {
+                Opcion tareas = elegir("¿Cuál es tu uso principal?", "Oficina", new Opcion[]{
+                    new Opcion("Ofimática (Word, Excel, PowerPoint)", "ofimatica"),
+                    new Opcion("Clases en línea y videollamadas", "docencia_virtual"),
+                    new Opcion("Diseño ligero (Canva, presentaciones)", "diseno_ligero"),
+                    new Opcion("Gestión administrativa y calificaciones", "gestion_administrativa")});
+                if (tareas != null) s.insertarPreferencia("maestro_tareas", tareas.valor);
 
-        } else if (uso.equals("maestro")) {
-            String[] tareas = {"ofimatica", "diseno_ligero", "base_datos", "docencia_virtual", "gestion_administrativa"};
-            String r1 = (String) JOptionPane.showInputDialog(null, "¿Cuáles son tus tareas principales?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, tareas, tareas[0]);
-            if (r1 != null) servicio.insertarPreferencia("pref_maestro_tareas", r1);
-
-            String[] formato = {"mini_pc", "torre", "todo_en_uno"};
-            String r2 = (String) JOptionPane.showInputDialog(null, "¿Qué formato prefieres?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, formato, formato[0]);
-            if (r2 != null) servicio.insertarPreferencia("pref_maestro_formato", r2);
-            
-            String[] ram = {"8gb", "16gb", "32gb"};
-            String r3 = (String) JOptionPane.showInputDialog(null, "¿Cuánta memoria RAM necesitas para tu trabajo diario?", "Maestro", JOptionPane.QUESTION_MESSAGE, null, ram, ram[0]);
-            if (r3 != null) servicio.insertarPreferencia("pref_maestro_ram", r3);
+                Opcion ram = elegir("¿Cuánta RAM necesitas para tu trabajo diario?", "Oficina", new Opcion[]{
+                    new Opcion("Básico (8 GB)", "8gb"),
+                    new Opcion("Cómodo para varias pestañas (16 GB)", "16gb"),
+                    new Opcion("Trabajo pesado (32 GB)", "32gb")});
+                if (ram != null) s.insertarPreferencia("maestro_ram", ram.valor);
+                break;
+            }
         }
+    }
+
+    private static void mostrarResultado(PrologService s, Map<String, String> b,
+                                          double presupuestoTotal, double costoPeri, String textoPeri) {
+        double torre = Double.parseDouble(b.get("total"));
+        double total = torre + costoPeri;
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("¡TU PC RECOMENDADA!\n\n");
+        sb.append("==================================================\n");
+        sb.append("CPU:           ").append(s.obtenerNombre(b.get("cpu"))).append("\n");
+        sb.append("GPU:           ").append(s.obtenerNombre(b.get("gpu"))).append("\n");
+        sb.append("Placa madre:   ").append(s.obtenerNombre(b.get("motherboard"))).append("\n");
+        sb.append("RAM:           ").append(s.obtenerNombre(b.get("ram"))).append("\n");
+        sb.append("Almacenamiento:").append(" ").append(s.obtenerNombre(b.get("almacenamiento"))).append("\n");
+        sb.append("Fuente:        ").append(s.obtenerNombre(b.get("fuente"))).append("\n");
+        sb.append("Gabinete:      ").append(s.obtenerNombre(b.get("gabinete"))).append("\n");
+        sb.append("Cooler:        ").append(s.obtenerNombre(b.get("cooler"))).append("\n\n");
+        sb.append(String.format("Consumo estimado: %s W\n", b.get("consumo")));
+        sb.append("==================================================\n");
+        sb.append(String.format("Presupuesto total: $%.2f USD\n", presupuestoTotal));
+        sb.append("Periféricos: ").append(textoPeri).append("\n");
+        sb.append(String.format("Costo de la torre: $%.2f USD\n", torre));
+        sb.append(String.format("Costo total con periféricos: $%.2f USD\n", total));
+        sb.append(String.format("Sobrante del presupuesto: $%.2f USD\n", presupuestoTotal - total));
+
+        JTextArea area = new JTextArea(sb.toString());
+        area.setEditable(false);
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setPreferredSize(new Dimension(640, 480));
+        JOptionPane.showMessageDialog(null, scroll, "Tu PC Recomendada", JOptionPane.INFORMATION_MESSAGE);
     }
 }
