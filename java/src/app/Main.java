@@ -26,6 +26,7 @@ public class Main {
             "Bienvenido a PC Builder Expert.\n\nResponde unas preguntas y te recomendaré el mejor armado posible para tu presupuesto.",
             "PC Builder Expert", JOptionPane.INFORMATION_MESSAGE);
 
+        // 1. Uso
         Opcion[] usos = {
             new Opcion("Gaming", "gaming"),
             new Opcion("Edición de video, 3D o fotos", "edicion"),
@@ -35,6 +36,7 @@ public class Main {
         Opcion uso = elegir("¿Cuál es el uso principal de tu PC?", "Paso 1: Uso", usos);
         if (uso == null) return;
 
+        // 2. Periféricos
         Opcion[] perifericos = {
             new Opcion("Ninguno, ya tengo todo", "0"),
             new Opcion("Solo monitor (~$120)", "120"),
@@ -44,6 +46,7 @@ public class Main {
         if (peri == null) return;
         double costoPeri = Double.parseDouble(peri.valor);
 
+        // 3. Presupuesto
         String entrada = JOptionPane.showInputDialog(null,
             "¿Cuál es tu presupuesto total en USD (incluye periféricos si los vas a comprar)?\nEjemplo: 1000",
             "Paso 3: Presupuesto", JOptionPane.QUESTION_MESSAGE);
@@ -56,8 +59,23 @@ public class Main {
             return;
         }
         if (presupuestoTotal <= 0) return;
+        
         double presupuestoTorre = presupuestoTotal - costoPeri;
+        
+        if (presupuestoTorre <= 0) {
+            JOptionPane.showMessageDialog(null, "El presupuesto es muy bajo para incluir periféricos.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
+        // 4. VALIDACIÓN TEMPRANA (AQUÍ ESTÁ EL ARREGLO)
+        if (!servicio.presupuestoEsSuficiente(uso.valor, presupuestoTorre)) {
+            JOptionPane.showMessageDialog(null,
+                String.format("Con $%.0f para la PC no alcanza para un equipo de tipo \"%s\".\nAumenta el presupuesto o cambia el uso.", presupuestoTorre, uso.texto),
+                "Presupuesto insuficiente", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 5. Reutilizar
         Opcion[] reutiliza = {
             new Opcion("No, compro todo", "ninguno"),
             new Opcion("Tengo RAM DDR4", "ram_ddr4"),
@@ -67,6 +85,7 @@ public class Main {
         Opcion reu = elegir("¿Tienes alguna pieza que puedas reutilizar?\n(no se suma su costo; la placa se elige compatible)", "Paso 4: Reutilizar", reutiliza);
         if (reu == null) return;
 
+        // 6. Tamaño
         Opcion[] tamanos = {
             new Opcion("Normal (ATX)", "normal"),
             new Opcion("Compacta (mATX)", "compacta"),
@@ -76,6 +95,7 @@ public class Main {
         Opcion tam = elegir("¿Qué tamaño de PC prefieres?", "Paso 5: Tamaño", tamanos);
         if (tam == null) return;
 
+        // 7. Marca
         Opcion[] marcas = {
             new Opcion("Sin preferencia", "indiferente"),
             new Opcion("Intel", "intel"),
@@ -84,19 +104,14 @@ public class Main {
         Opcion marca = elegir("¿Prefieres alguna marca de procesador?", "Paso 6: Marca", marcas);
         if (marca == null) return;
 
+        // 8. Preguntas del Uso
         servicio.limpiarPreferencias();
         servicio.insertarPreferencia("tamano", tam.valor);
         servicio.insertarPreferencia("marca_cpu", marca.valor);
         servicio.insertarPreferencia("reutiliza", reu.valor);
         preguntasDelUso(servicio, uso.valor);
 
-        if (!servicio.presupuestoEsSuficiente(uso.valor, presupuestoTorre)) {
-            JOptionPane.showMessageDialog(null,
-                String.format("Con $%.0f para la PC no alcanza para un equipo de tipo \"%s\".\nAumenta el presupuesto o cambia el uso.", presupuestoTorre, uso.texto),
-                "Presupuesto insuficiente", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
+        // 9. Obtener Resultado
         Map<String, String> build = servicio.obtenerMejorBuild(uso.valor, presupuestoTorre);
         if (build == null) {
             JOptionPane.showMessageDialog(null,
