@@ -342,12 +342,13 @@ lista_alm(Uso, Lista) :-
     ordenar(Pares, Lista).
 
 lista_psu(_, TC, TG, G, Lista) :-
-    W is ceiling(1.3 * (TC + TG)),
+    W_req is ceiling(1.3 * (TC + TG)),
+    ( (TG >= 250) -> W is max(W_req, 850) ; W = W_req ), 
     precio(gpu, G, P_Gpu),
-    ( (TG >= 300 ; P_Gpu >= 200) -> WMin = 650, CertMin = gold ; WMin = W, CertMin = bronze ), 
+    ( (TG >= 150 ; P_Gpu >= 250) -> CertMin = gold ; CertMin = bronze ),
     findall(K-Id, ( 
           fuente(Id, _, _, Watts, Cert, Atx3, P),
-          Watts >= WMin, 
+          Watts >= W, 
           cert_rank(Cert, R), cert_rank(CertMin, RMin), R >= RMin,
           ( TG >= 300 -> Atx3 == si ; true ),
           K is P  
