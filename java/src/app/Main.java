@@ -14,7 +14,23 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        app.servicio.DllLoader.cargar();
+                 // --- 1. ACTIVAR FLATLAF (Modo Oscuro Ejecutivo) ---
+        try {
+            javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarkLaf());
+            
+            // Un gris muy oscuro, elegante
+            java.awt.Color miFondo = new java.awt.Color(40, 44, 52); 
+            
+            javax.swing.UIManager.put("Panel.background", miFondo);
+            javax.swing.UIManager.put("OptionPane.background", miFondo);
+            javax.swing.UIManager.put("OptionPane.messageForeground", new java.awt.Color(220, 220, 220)); // Texto gris claro
+            javax.swing.UIManager.put("Button.background", new java.awt.Color(60, 64, 72));
+            javax.swing.UIManager.put("Button.foreground", java.awt.Color.WHITE);
+            
+        } catch (Exception ex) {
+            System.err.println("No se pudo cargar FlatLaf");
+        }
+
         PrologService servicio;
         try {
             servicio = new PrologService();
@@ -68,7 +84,7 @@ public class Main {
             return;
         }
 
-        // 4. VALIDACIÓN TEMPRANA (AQUÍ ESTÁ EL ARREGLO)
+        // 4. VALIDACIÓN TEMPRANA
         if (!servicio.presupuestoEsSuficiente(uso.valor, presupuestoTorre)) {
             JOptionPane.showMessageDialog(null,
                 String.format("Con $%.0f para la PC no alcanza para un equipo de tipo \"%s\".\nAumenta el presupuesto o cambia el uso.", presupuestoTorre, uso.texto),
