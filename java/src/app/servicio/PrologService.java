@@ -13,22 +13,46 @@ public class PrologService {
     private static final String RUTA_BC = buscarRuta();
 
     private static String buscarRuta() {
-        String[] rutas = {"../prolog/base_conocimiento.pl", "prolog/base_conocimiento.pl", "base_conocimiento.pl"};
+        // Busca el archivo .pl en las rutas posibles (desarrollo y ejecutable)
+        String[] rutas = {
+            "base_conocimiento.pl", 
+            "app/base_conocimiento.pl",
+            "../prolog/base_conocimiento.pl", 
+            "prolog/base_conocimiento.pl"
+        };
         for (String r : rutas) {
             if (new File(r).exists()) return r.replace("\\", "/");
         }
-        throw new RuntimeException("No se encontró base_conocimiento.pl. Ejecuta desde la carpeta java/ o la raíz.");
+        throw new RuntimeException("No se encontró base_conocimiento.pl.");
     }
 
     public PrologService() {
         try {
-            String bin = "C:\\Program Files\\swipl\\bin\\";
-            System.load(bin + "libwinpthread-1.dll");
-            System.load(bin + "libgcc_s_seh-1.dll");
-            System.load(bin + "libgmp-10.dll");
-            System.load(bin + "zlib1.dll");
-            System.load(bin + "libswipl.dll");
-            System.load(bin + "jpl.dll");
+            // Busca las DLLs en la misma carpeta de la app (Portátil) o en la ruta de desarrollo
+            String[] rutasDll = {
+                System.getProperty("user.dir") + File.separator + "bin" + File.separator,
+                System.getProperty("user.dir") + File.separator + "app" + File.separator + "bin" + File.separator,
+                "C:\\Program Files\\swipl\\bin\\"
+            };
+            
+            String rutaEncontrada = null;
+            for (String ruta : rutasDll) {
+                if (new File(ruta + "jpl.dll").exists()) {
+                    rutaEncontrada = ruta;
+                    break;
+                }
+            }
+
+            if (rutaEncontrada != null) {
+                System.load(rutaEncontrada + "libwinpthread-1.dll");
+                System.load(rutaEncontrada + "libgcc_s_seh-1.dll");
+                System.load(rutaEncontrada + "libgmp-10.dll");
+                System.load(rutaEncontrada + "zlib1.dll");
+                System.load(rutaEncontrada + "libswipl.dll");
+                System.load(rutaEncontrada + "jpl.dll");
+            } else {
+                System.err.println("Aviso: No se encontraron las DLLs de Prolog.");
+            }
         } catch (UnsatisfiedLinkError e) {
             System.err.println("Aviso: carga manual de DLL omitida, usando PATH.");
         }
@@ -57,12 +81,11 @@ public class PrologService {
      * Ahora solo devuelve 1 Build usando el perfil "maximo" (100% del presupuesto).
      */
     public Map<String, String> obtenerMejorBuild(String uso, double presupuesto) {
-        // Usamos el perfil "maximo" para que exprima el presupuesto al 100%
         Query q = new Query(String.format(Locale.US,
             "mejor_build(%s, maximo, %.2f, C, G, M, R, A, F, B, K, Total)", uso, presupuesto));
         
         try {
-            if (!q.hasSolution()) return null; // Si no hay solución, devuelve null
+            if (!q.hasSolution()) return null;
             
             Map<String, Term> s = q.oneSolution();
             Map<String, String> b = new LinkedHashMap<>();

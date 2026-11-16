@@ -14,6 +14,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        app.servicio.DllLoader.cargar();
         PrologService servicio;
         try {
             servicio = new PrologService();

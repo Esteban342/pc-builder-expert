@@ -13,3 +13,10 @@ Thumbs.db
 
 # Archivos temporales
 *.log
+
+# Archivos compilados y ejecutables generados
+*.jar
+!lib/*.jar
+*.exe
+PCBuilderExpert/
+EntradaApp/
