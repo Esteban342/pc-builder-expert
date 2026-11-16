@@ -2,62 +2,67 @@
 
 Este repositorio contiene el proyecto final para la materia de Programación Lógica y Funcional. Consiste en un Sistema Experto basado en reglas, desarrollado utilizando Java para la interfaz de usuario y Prolog para la base de conocimiento y la inferencia lógica.
 
-El sistema está diseñado para orientar a los usuarios en la elección de componentes de hardware (CPU, GPU, Motherboard y RAM) para armar una computadora personal. A través de un cuestionario interactivo, el sistema deduce el mejor "Build" basándose en el presupuesto del usuario y el uso principal que le dará a la PC (Gaming, Edición, Programación o Estudio/Maestro).
+El sistema está diseñado para orientar a los usuarios en la elección de componentes de hardware para armar una computadora personal. A través de un cuestionario interactivo, el sistema deduce el mejor "Build" posible basándose en el presupuesto del usuario, el uso principal (Gaming, Edición, Programación o Maestro) y restricciones físicas reales.
 
 ## Características del Sistema
 
-*   Interfaz gráfica interactiva desarrollada en Java utilizando `JOptionPane` (ventanas emergentes nativas), cumpliendo estrictamente con el requisito de no usar HTML, CSS ni JavaScript.
-*   Base de conocimiento robusta en Prolog con componentes reales del mercado (procesadores AMD/Intel, tarjetas NVIDIA/AMD, etc.) con sus precios y consumos (TDP) reales.
-*   **Lógica de inferencia compleja:**
-    *   **Compatibilidad de Socket:** Asegura que el CPU y la Motherboard sean físicamente compatibles (AM4, AM5, LGA1700).
-    *   **Cálculo de Fuente de Poder:** Suma el TDP del CPU y la GPU, añade un 30% de margen de seguridad y recomienda el rango de Watts necesario.
-    *   **Detección de Cuello de Botella:** Evita combinaciones ilógicas (ej. un CPU de gama baja con una GPU de gama alta) para no desperdiciar el presupuesto.
-    *   **Validación de Presupuesto y Uso:** Filtra los componentes según el enfoque del usuario (ej. priorizar CPU para programación o priorizar GPU para Gaming) sin exceder el dinero disponible.
+*   **Interfaz gráfica moderna:** Desarrollada en Java Swing utilizando **FlatLaf** (Modo Oscuro Ejecutivo), cumpliendo estrictamente con el requisito de no usar HTML, CSS ni JavaScript.
+*   **Catálogo masivo de hardware:** Base de conocimiento en Prolog con más de **110 componentes reales** (CPUs, GPUs, Motherboards, RAM, SSD/HDD, Fuentes y Gabinetes) con sus precios y consumos (TDP) reales.
+*   **Lógica de inferencia compleja (El Cerebro):**
+    *   **Compatibilidad Física:** Valida sockets (AM4, AM5, LGA1700), tipo de RAM (DDR4/DDR5) y chipsets.
+    *   **Validación de Espacio:** Asegura que la tarjeta gráfica quepa a lo largo en el gabinete y que el cooler no exceda la altura máxima.
+    *   **Cálculo de Fuente de Poder:** Suma el TDP del CPU y la GPU, añade un 30% de margen de seguridad, y exige fuentes con certificación Gold si la GPU es de gama alta.
+    *   **Detección de Cuello de Botella:** Evita combinaciones ilógicas (ej. un CPU de gama baja con una GPU de gama alta, o viceversa).
+    *   **Reglas por Software:** Filtra componentes según el software (ej. exige tarjetas NVIDIA para Blender, o 32GB de RAM para Inteligencia Artificial local y Máquinas Virtuales).
+*   **Ajuste de Presupuesto:** El sistema descuenta el costo de periféricos (monitor, teclado, ratón) para calcular el presupuesto real de la torre.
 
 ## Tecnologías Utilizadas
 
-*   Java (JDK 25)
-*   SWI-Prolog (versión 10.x)
+*   Java (JDK 17 o superior)
+*   SWI-Prolog (versión 9 o 10)
 *   Librería JPL (Java Interface to SWI-Prolog) para la conexión entre ambos entornos.
+*   **FlatLaf** para la mejora visual de la interfaz.
 *   Patrón de arquitectura de software MVC (Modelo-Vista-Controlador).
 *   Git y GitHub para el control de versiones.
 
 ## Estructura del Repositorio
 
-*   `prolog/`: Contiene el archivo `base_conocimiento.pl` con los hechos (componentes) y reglas lógicas del sistema experto.
-*   `java/`: Contiene el código fuente del proyecto en Java bajo el patrón MVC.
+*   `prolog/`: Contiene el archivo `base_conocimiento.pl` con los hechos, reglas lógicas y perfiles del sistema experto.
+*   `java/`: Contiene el código fuente del proyecto en Java.
     *   `src/app/`: Código fuente (Main, Servicios, etc.).
-    *   `lib/`: Librerías externas necesarias (jpl.jar).
-    *   `bin/`: Archivos `.dll` de SWI-Prolog necesarios para la conexión nativa.
+    *   `lib/`: Librerías externas necesarias (`jpl.jar`, `flatlaf.jar`).
+    *   `bin/`: Archivos `.dll` de SWI-Prolog necesarios para la conexión nativa (Portabilidad).
     *   `ejecutar.bat`: Script automatizado para compilar y ejecutar el proyecto en Windows.
 
-## Requisitos Previos
+## Requisitos Previos (Para Ejecutar desde el Código)
 
-Para ejecutar y probar este proyecto de manera local, es necesario tener instalado:
+Para ejecutar y probar este proyecto de manera local (desde el código fuente), es necesario tener instalado:
 
 1.  Java Development Kit (JDK) versión 17 o superior.
-2.  SWI-Prolog instalado y configurado en las variables de entorno del sistema.
-3.  Un IDE para Java (VS Code, NetBeans o Eclipse) o simplemente usar la terminal de comandos.
+2.  SWI-Prolog (se recomienda instalarlo en la ruta por defecto `C:\Program Files\swipl`).
+3.  Un IDE para Java (VS Code, NetBeans o Eclipse) o terminal de comandos.
 
 ## Instrucciones de Ejecución
 
-1. Clonar el repositorio a tu máquina local:
-   ```bash
-   git clone https://github.com/Esteban342/pc-builder-expert.git
+### Opción A: Desde el código fuente (Desarrollo)
+1. Clonar el repositorio:
+   `git clone https://github.com/Esteban342/pc-builder-expert.git`
+2. Abrir la carpeta del proyecto en tu IDE o terminal.
+3. Asegurarse de tener el archivo `jpl.jar` y los archivos `.dll` en sus carpetas correspondientes (`java/lib/` y `java/bin/`).
+4. Ejecutar el archivo `.bat` desde la terminal en la raíz del proyecto:
+   `.\java\ejecutar.bat`
 
-2. Abrir la carpeta del proyecto en tu IDE de preferencia o terminal.
+### Opción B: Usando el Ejecutable (.exe) - Para el Usuario Final
+1. Descargar la carpeta comprimida (ZIP) de la versión final.
+2. Descomprimir la carpeta `PCBuilderExpert`.
+3. Hacer doble clic en el archivo `PCBuilderExpert.exe`. 
+*(Esta versión empaquetada con `jpackage` incluye todo lo necesario para correr en Windows sin instalar Java ni Prolog).*
 
-3. Asegurarse de tener el archivo jpl.jar y los archivos .dll de Prolog en sus respectivas carpetas (java/lib/ y java/bin/).
+## Autores
 
-4. Ejecutar el archivo .bat desde la terminal en la raíz del proyecto:
+*   **Esteban342** (Mejorado Martinez Juan Esteban) - *Desarrollo Lógico y Java*
+*   **[Nombre de Cristian]** - *Documentación y Video*
+*   **[Nombre de Chuchin]** - *Manual de Usuario y Pruebas*
+*   **[Nombre de Jesús]** - *Cronograma y Reporte Técnico*
 
-.\java\ejecutar.bat
-
-(Este script se encarga de configurar las rutas de las librerías nativas, compilar el código y abrir la interfaz).
-
-5. Interactuar con las ventanas emergentes respondiendo el cuestionario para recibir la recomendación del sistema.
-
-Autor
-Esteban342 (Mejorado Martinez Juan Esteban)
-
-Ingeniería en Sistemas Computacionales
+*Ingeniería en Sistemas Computacionales*
