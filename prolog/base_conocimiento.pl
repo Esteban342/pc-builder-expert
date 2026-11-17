@@ -1,6 +1,6 @@
 :- encoding(utf8).
 % ============================================================
-% PC Builder Expert - Base de Conocimiento v6.2 (Lógica Corregida)
+% PC Builder Expert - Base de Conocimiento    210 echos y 63 reglas
 % ============================================================
 
 :- dynamic pref/2.
