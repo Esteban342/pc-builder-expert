@@ -1,4 +1,4 @@
-# PC Builder Expert: Sistema Experto para Armado y Compatibilidad de Computadoras
+# PC Builder Expert: Sistema Experto para Armado y Compatibilidad de Computadoras  
 
 Este repositorio contiene el proyecto final para la materia de Programación Lógica y Funcional. Consiste en un Sistema Experto basado en reglas, desarrollado utilizando Java para la interfaz de usuario y Prolog para la base de conocimiento y la inferencia lógica.
 
