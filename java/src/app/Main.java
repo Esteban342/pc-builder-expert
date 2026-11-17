@@ -4,6 +4,7 @@ import app.servicio.PrologService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 import java.util.Map;
 
 public class Main {
@@ -14,16 +15,15 @@ public class Main {
     }
 
     public static void main(String[] args) {
-                 // --- 1. ACTIVAR FLATLAF (Modo Oscuro Ejecutivo) ---
+        // --- 1. ACTIVAR FLATLAF (Modo Oscuro Ejecutivo) ---
         try {
             javax.swing.UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarkLaf());
             
-            // Un gris muy oscuro, elegante
             java.awt.Color miFondo = new java.awt.Color(40, 44, 52); 
             
             javax.swing.UIManager.put("Panel.background", miFondo);
             javax.swing.UIManager.put("OptionPane.background", miFondo);
-            javax.swing.UIManager.put("OptionPane.messageForeground", new java.awt.Color(220, 220, 220)); // Texto gris claro
+            javax.swing.UIManager.put("OptionPane.messageForeground", new java.awt.Color(220, 220, 220));
             javax.swing.UIManager.put("Button.background", new java.awt.Color(60, 64, 72));
             javax.swing.UIManager.put("Button.foreground", java.awt.Color.WHITE);
             
@@ -137,7 +137,8 @@ public class Main {
             return;
         }
 
-        mostrarResultado(servicio, build, presupuestoTotal, costoPeri, peri.texto);
+        // --- AQUÍ PASAMOS EL "uso.valor" AL MÉTODO ---
+        mostrarResultado(servicio, build, uso.valor, presupuestoTotal, costoPeri, peri.texto);
     }
 
     private static Opcion elegir(String pregunta, String titulo, Opcion[] opciones) {
@@ -231,14 +232,15 @@ public class Main {
         }
     }
 
-    private static void mostrarResultado(PrologService s, Map<String, String> b,
+    // --- MÉTODO MODIFICADO PARA MOSTRAR LA IMAGEN ---
+    private static void mostrarResultado(PrologService s, Map<String, String> b, String uso,
                                           double presupuestoTotal, double costoPeri, String textoPeri) {
         double torre = Double.parseDouble(b.get("total"));
         double total = torre + costoPeri;
         
         StringBuilder sb = new StringBuilder();
         sb.append("¡TU PC RECOMENDADA!\n\n");
-        sb.append("==================================================\n");
+        sb.append("=========================================\n");
         sb.append("CPU:           ").append(s.obtenerNombre(b.get("cpu"))).append("\n");
         sb.append("GPU:           ").append(s.obtenerNombre(b.get("gpu"))).append("\n");
         sb.append("Placa madre:   ").append(s.obtenerNombre(b.get("motherboard"))).append("\n");
@@ -248,7 +250,7 @@ public class Main {
         sb.append("Gabinete:      ").append(s.obtenerNombre(b.get("gabinete"))).append("\n");
         sb.append("Cooler:        ").append(s.obtenerNombre(b.get("cooler"))).append("\n\n");
         sb.append(String.format("Consumo estimado: %s W\n", b.get("consumo")));
-        sb.append("==================================================\n");
+        sb.append("=========================================\n");
         sb.append(String.format("Presupuesto total: $%.2f USD\n", presupuestoTotal));
         sb.append("Periféricos: ").append(textoPeri).append("\n");
         sb.append(String.format("Costo de la torre: $%.2f USD\n", torre));
@@ -257,9 +259,39 @@ public class Main {
 
         JTextArea area = new JTextArea(sb.toString());
         area.setEditable(false);
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+        area.setOpaque(false); // Fondo transparente para que se vea el modo oscuro
+
         JScrollPane scroll = new JScrollPane(area);
-        scroll.setPreferredSize(new Dimension(640, 480));
-        JOptionPane.showMessageDialog(null, scroll, "Tu PC Recomendada", JOptionPane.INFORMATION_MESSAGE);
+        scroll.setPreferredSize(new Dimension(450, 480));
+        scroll.setBorder(null); // Quitar borde feo
+
+        // --- Cargar Imagen ---
+        JLabel labelImagen = new JLabel();
+        labelImagen.setVerticalAlignment(SwingConstants.TOP);
+        try {
+            // Busca la imagen en la carpeta img (ej. gaming.jpg)
+            URL imgURL = Main.class.getResource("/app/img/" + uso + ".jpg");
+            
+            if (imgURL != null) {
+                ImageIcon iconoOriginal = new ImageIcon(imgURL);
+                // Escalamos la imagen a 300px de ancho, manteniendo proporción
+                Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(300, -1, Image.SCALE_SMOOTH);
+                labelImagen.setIcon(new ImageIcon(imagenEscalada));
+            } else {
+                labelImagen.setText("<html><br><br>[Imagen no encontrada]<br>Verifica que " + uso + ".jpg<br>esté en /app/img/</html>");
+                labelImagen.setForeground(Color.RED);
+            }
+        } catch (Exception e) {
+            labelImagen.setText("[Error al cargar imagen]");
+        }
+
+        // --- Panel para unir todo ---
+        JPanel panelPrincipal = new JPanel(new BorderLayout(15, 0));
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelPrincipal.add(labelImagen, BorderLayout.WEST);
+        panelPrincipal.add(scroll, BorderLayout.CENTER);
+
+        JOptionPane.showMessageDialog(null, panelPrincipal, "Tu PC Recomendada", JOptionPane.PLAIN_MESSAGE);
     }
 }
